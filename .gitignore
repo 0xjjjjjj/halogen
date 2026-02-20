@@ -1,0 +1,23 @@
+# Game binaries and ISOs — never commit
+*.iso
+*.ISO
+*.bin
+*.BIN
+*.elf
+*.ELF
+
+# PS2Recomp build artifacts
+vendor/
+
+# Tool caches
+.tldr/
+.tldrignore
+__pycache__/
+*.pyc
+
+# PS2Recomp output
+output/
+
+# Editor
+.vscode/
+*.swp
