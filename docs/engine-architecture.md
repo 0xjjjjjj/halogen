@@ -2,7 +2,9 @@
 
 Generated from ELF symbol table analysis of Champions of Norrath (SLUS-20565).
 
-**14,370 functions | 646 classes | ~3.9 MB code**
+**14,370 functions | 660 classes | ~3.9 MB code**
+
+*Classification accuracy: 57.5% classified, 42.5% unclassified (improved from 50.4% initial)*
 
 ## Engine Overview
 
@@ -44,6 +46,30 @@ The Snowblind Engine uses a `VI*` prefix convention for all engine classes (like
 | Spell System | ~85 | ~50.0 | VISpellEventDriver (34/22.4KB), VISpellEffectSystem (24), VISpellEffect, VIBolt, VIBoltHarmonic, VITrailFx |
 | Atmosphere | 28 | 21.1 | VIAtmosphere — weather/environmental effects |
 | Flora | ~17 | ~7.2 | VIRadialFloraSystem, VIFloraSprite, VIZoneRadialFlora |
+
+### Game-Specific Code (expanded)
+
+| Subsystem | Functions | Size (KB) | Key Classes |
+|-----------|-----------|-----------|-------------|
+| Game Entities | 543 | 434.4 | Player, Creature, Orc, Goblin, Skeleton, Cyclops, SpiderQueen, VampireLord, Innoruuk |
+| Skills | 482 | 53.4 | SkillCriticalHit, SkillFireWeapons, SkillColdArrow, SkillHolyShield, ~60 Skill* classes |
+| Game Props | 261 | 76.3 | Container, Chest, DoorSwing, Lever, Teleporter, WeaponRack, Candle, Gold |
+| Spells | 159 | 86.8 | SpellCharge, SpellBlessed, SpellHolyShield, SpellAncestralCall |
+| Projectiles | 87 | 51.0 | MissileWeapon, HolyBolt, DiseaseBolt, IceBall, LavaBomb, Sparks |
+
+### Engine Template Containers (VI* STL replacement)
+
+| Class | Methods | Size (KB) | Notes |
+|-------|---------|-----------|-------|
+| VIPool | 145 | 24.0 | Memory pool allocator |
+| VIArray | 101 | 8.7 | Dynamic array |
+| VIList | 48 | 4.9 | Linked list |
+| VIMap | 47 | 14.6 | Associative map |
+| VIMultiMap | 37 | 11.6 | Multi-key map |
+| VIVector | 25 | 4.2 | Vector container |
+| VISet | 11 | 3.6 | Set container |
+
+These are the engine's custom STL replacement — discovered via template mangling support.
 
 ### External/Runtime
 
@@ -178,7 +204,7 @@ Visual effects:
 
 1. **VIRaster is the heart** — 168 methods, manages all GS interaction. BeginScene/EndScene, DMA submission, scissoring, double-buffering.
 
-2. **The "Other" bucket is huge** — 7,138 functions (49.6%) are unclassified. Many are likely free functions, templates, or game logic not attached to VI* classes. Improving classification will require Ghidra analysis.
+2. **The "Other" bucket** — 6,112 functions (42.5%) remain unclassified. Reduced from 49.6% via template mangling support, expanded entity/skill/spell classification, and word-boundary keyword matching. Remaining "Other" is mostly free functions, libxml2, and game logic not attached to named classes. Further reduction requires Ghidra analysis.
 
 3. **Sprite hierarchy = entity system** — Everything renderable inherits from VISprite. This is the entity-component pattern of its era.
 
@@ -193,15 +219,17 @@ Visual effects:
 ## Subsystem Size Distribution
 
 ```
-Renderer + DMA/GIF + Lighting + Particles:  298.1 KB (23.2%)  ← GRAPHICS
+Renderer + DMA/GIF + Lighting + Particles:  218.7 KB (17.0%)  ← GRAPHICS
 Scene + Zone/World + Camera:                121.0 KB  (9.4%)  ← WORLD
-Game Entities + Physics + Spells:           311.7 KB (24.3%)  ← GAMEPLAY
-Networking:                                 192.0 KB (15.0%)  ← NETWORK
+Game Entities + Skills + Spells + Props:    701.9 KB (54.7%)  ← GAMEPLAY
+Projectiles:                                 51.0 KB  (4.0%)  ← GAMEPLAY
+Networking:                                 193.3 KB (15.1%)  ← NETWORK
 Audio:                                       40.1 KB  (3.1%)  ← AUDIO
 UI + Font:                                   35.4 KB  (2.8%)  ← UI
-AMX Scripting:                               25.2 KB  (2.0%)  ← SCRIPTING
-Math + String + I/O + Setup:                255.2 KB (19.9%)  ← FOUNDATION
-C++/Sony Runtime:                           391.3 KB           ← RUNTIME (not engine)
+AMX Scripting:                               25.6 KB  (2.0%)  ← SCRIPTING
+Math + String + I/O + Setup:                184.6 KB (14.4%)  ← FOUNDATION
+Engine containers (VIPool/Array/Map/etc):    71.6 KB  (5.6%)  ← ENGINE INFRA
+C++/Sony Runtime:                           316.4 KB           ← RUNTIME (not engine)
 ```
 
 Graphics subsystem (renderer + particles + lighting + DMA) makes up ~23% of engine code — the primary target for native port optimization.

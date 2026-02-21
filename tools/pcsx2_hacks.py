@@ -15,6 +15,8 @@ Usage:
 import argparse
 import json
 import sys
+import time
+import urllib.error
 from pathlib import Path
 
 try:
@@ -45,14 +47,28 @@ SNOWBLIND_SERIALS = {
 
 
 def download_gameindex() -> Path:
-    """Download GameIndex.yaml if not cached."""
+    """Download GameIndex.yaml with atomic write and cache expiry."""
     if CACHE_PATH.exists():
-        return CACHE_PATH
+        age = time.time() - CACHE_PATH.stat().st_mtime
+        if age < 7 * 86400:  # 7 day cache
+            return CACHE_PATH
 
     import urllib.request
+
     CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    print(f"Downloading GameIndex.yaml...", file=sys.stderr)
-    urllib.request.urlretrieve(GAMEINDEX_URL, CACHE_PATH)
+    tmp = CACHE_PATH.with_suffix(".tmp")
+    try:
+        print("Downloading GameIndex.yaml...", file=sys.stderr)
+        urllib.request.urlretrieve(GAMEINDEX_URL, tmp)
+        if tmp.stat().st_size < 1000:
+            raise ValueError(f"Downloaded file too small ({tmp.stat().st_size} bytes), likely an error page")
+        tmp.replace(CACHE_PATH)
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        tmp.unlink(missing_ok=True)
+        if CACHE_PATH.exists():
+            print(f"Download failed ({e}), using cached version", file=sys.stderr)
+            return CACHE_PATH
+        raise
     return CACHE_PATH
 
 

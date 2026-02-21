@@ -1,6 +1,6 @@
 {
   "total_functions": 14370,
-  "total_classes": 646,
+  "total_classes": 660,
   "classes": {
     "VIRaster": {
       "method_count": 168,
@@ -846,6 +846,738 @@
           "name": "PointInTriangle",
           "addr": "0x10fa0f0",
           "size": 716
+        }
+      ]
+    },
+    "VIPool": {
+      "method_count": 145,
+      "total_size": 24616,
+      "subsystem": "Engine (VIPool)",
+      "methods": [
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1212f70",
+          "size": 160
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1225f30",
+          "size": 160
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1203a90",
+          "size": 152
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1201ca8",
+          "size": 252
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1202af8",
+          "size": 112
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1224e70",
+          "size": 104
+        },
+        {
+          "name": "Init",
+          "addr": "0x12113d8",
+          "size": 92
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1212de0",
+          "size": 88
+        },
+        {
+          "name": "Init",
+          "addr": "0x1211468",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x1211528",
+          "size": 92
+        },
+        {
+          "name": "Add",
+          "addr": "0x1205650",
+          "size": 328
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1221318",
+          "size": 228
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1222758",
+          "size": 104
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1211340",
+          "size": 32
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1208cf8",
+          "size": 256
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1212cd8",
+          "size": 88
+        },
+        {
+          "name": "Add",
+          "addr": "0x1220498",
+          "size": 312
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1208e68",
+          "size": 160
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1203968",
+          "size": 112
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1212ed0",
+          "size": 160
+        },
+        {
+          "name": "Add",
+          "addr": "0x1225720",
+          "size": 264
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12036c8",
+          "size": 104
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1203480",
+          "size": 32
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12131f0",
+          "size": 32
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1212d30",
+          "size": 88
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1208860",
+          "size": 104
+        },
+        {
+          "name": "Insert",
+          "addr": "0x12211a8",
+          "size": 364
+        },
+        {
+          "name": "Add",
+          "addr": "0x1201938",
+          "size": 268
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1225e18",
+          "size": 88
+        },
+        {
+          "name": "Init",
+          "addr": "0x12249b0",
+          "size": 92
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1202a98",
+          "size": 96
+        },
+        {
+          "name": "Add",
+          "addr": "0x1207368",
+          "size": 264
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1225a60",
+          "size": 304
+        },
+        {
+          "name": "Add",
+          "addr": "0x1208b08",
+          "size": 264
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1212868",
+          "size": 304
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1210780",
+          "size": 204
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1210da8",
+          "size": 256
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1202b68",
+          "size": 264
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1222fe8",
+          "size": 204
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1224568",
+          "size": 32
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1224d98",
+          "size": 104
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1207470",
+          "size": 228
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1222a20",
+          "size": 160
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1208940",
+          "size": 160
+        },
+        {
+          "name": "constructor",
+          "addr": "0x11f3918",
+          "size": 32
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x12077d8",
+          "size": 88
+        },
+        {
+          "name": "Init",
+          "addr": "0x1202510",
+          "size": 428
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1224600",
+          "size": 32
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1210850",
+          "size": 204
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1212998",
+          "size": 304
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1208760",
+          "size": 256
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1211010",
+          "size": 32
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1212608",
+          "size": 304
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1207558",
+          "size": 256
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1213150",
+          "size": 160
+        },
+        {
+          "name": "Init",
+          "addr": "0x1224890",
+          "size": 92
+        },
+        {
+          "name": "Add",
+          "addr": "0x12122e0",
+          "size": 264
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1205d70",
+          "size": 288
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12035f8",
+          "size": 104
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1212e38",
+          "size": 88
+        },
+        {
+          "name": "Add",
+          "addr": "0x1203c88",
+          "size": 264
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1208e08",
+          "size": 92
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1224298",
+          "size": 104
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1208690",
+          "size": 204
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1206850",
+          "size": 104
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1213010",
+          "size": 160
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1224b70",
+          "size": 104
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12244d0",
+          "size": 32
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12115f8",
+          "size": 104
+        },
+        {
+          "name": "Init",
+          "addr": "0x1202328",
+          "size": 372
+        },
+        {
+          "name": "Add",
+          "addr": "0x11f3668",
+          "size": 264
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1221400",
+          "size": 280
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1225dc0",
+          "size": 88
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1203d90",
+          "size": 196
+        },
+        {
+          "name": "MoveToLast",
+          "addr": "0x1210ae0",
+          "size": 240
+        },
+        {
+          "name": "Erase",
+          "addr": "0x11f34d8",
+          "size": 228
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1211ab0",
+          "size": 104
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1211f28",
+          "size": 160
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1212ac8",
+          "size": 328
+        },
+        {
+          "name": "Add",
+          "addr": "0x12124d0",
+          "size": 312
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1206d30",
+          "size": 32
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1206be0",
+          "size": 160
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1211b88",
+          "size": 104
+        },
+        {
+          "name": "Erase",
+          "addr": "0x12123e8",
+          "size": 228
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1210ea8",
+          "size": 104
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1224438",
+          "size": 32
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1225930",
+          "size": 304
+        },
+        {
+          "name": "Init",
+          "addr": "0x1212c10",
+          "size": 92
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12076d0",
+          "size": 104
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1207738",
+          "size": 160
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1210f10",
+          "size": 32
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x11f39d8",
+          "size": 160
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1211860",
+          "size": 104
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1201ba8",
+          "size": 252
+        },
+        {
+          "name": "Add",
+          "addr": "0x12120d0",
+          "size": 264
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1225fd0",
+          "size": 160
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x11f3938",
+          "size": 88
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12116d0",
+          "size": 104
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1205ca0",
+          "size": 204
+        },
+        {
+          "name": "Add",
+          "addr": "0x1201a48",
+          "size": 348
+        },
+        {
+          "name": "Add",
+          "addr": "0x1225828",
+          "size": 264
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12110a8",
+          "size": 32
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12089e0",
+          "size": 32
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1208fd0",
+          "size": 104
+        },
+        {
+          "name": "Add",
+          "addr": "0x1225618",
+          "size": 264
+        },
+        {
+          "name": "Init",
+          "addr": "0x1224950",
+          "size": 92
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1226070",
+          "size": 160
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1203460",
+          "size": 32
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1203660",
+          "size": 104
+        },
+        {
+          "name": "Init",
+          "addr": "0x1202190",
+          "size": 316
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x12130b0",
+          "size": 160
+        },
+        {
+          "name": "Add",
+          "addr": "0x1211fc8",
+          "size": 264
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1203b28",
+          "size": 176
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1223850",
+          "size": 256
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1211210",
+          "size": 32
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12112a8",
+          "size": 32
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1203bd8",
+          "size": 176
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1208c10",
+          "size": 228
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12034a0",
+          "size": 32
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1212738",
+          "size": 304
+        },
+        {
+          "name": "Add",
+          "addr": "0x12121d8",
+          "size": 264
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12072d0",
+          "size": 32
+        },
+        {
+          "name": "Init",
+          "addr": "0x12248f0",
+          "size": 92
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1212c70",
+          "size": 104
+        },
+        {
+          "name": "Erase",
+          "addr": "0x12230b8",
+          "size": 204
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1225e70",
+          "size": 88
+        },
+        {
+          "name": "Init",
+          "addr": "0x1206e60",
+          "size": 92
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x11f3770",
+          "size": 304
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1223188",
+          "size": 204
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1202c70",
+          "size": 316
+        },
+        {
+          "name": "Add",
+          "addr": "0x1208588",
+          "size": 264
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x12133b8",
+          "size": 104
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1212d88",
+          "size": 88
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1225b90",
+          "size": 304
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1208f08",
+          "size": 32
+        },
+        {
+          "name": "Add",
+          "addr": "0x1210bd0",
+          "size": 264
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1202db0",
+          "size": 368
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x12069f8",
+          "size": 116
+        },
+        {
+          "name": "Add",
+          "addr": "0x1222e10",
+          "size": 264
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1210920",
+          "size": 204
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1210cd8",
+          "size": 204
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1225480",
+          "size": 160
+        },
+        {
+          "name": "Clear",
+          "addr": "0x11f3600",
+          "size": 104
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1222f18",
+          "size": 204
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1224c48",
+          "size": 104
         }
       ]
     },
@@ -2707,6 +3439,518 @@
           "name": "notifyEnterRoom",
           "addr": "0x1214b50",
           "size": 8
+        }
+      ]
+    },
+    "VIArray": {
+      "method_count": 101,
+      "total_size": 8900,
+      "subsystem": "Engine (VIArray)",
+      "methods": [
+        {
+          "name": "Allocate",
+          "addr": "0x1214fb8",
+          "size": 136
+        },
+        {
+          "name": "Init",
+          "addr": "0x1227360",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x1227300",
+          "size": 92
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x12101d0",
+          "size": 76
+        },
+        {
+          "name": "Init",
+          "addr": "0x1207130",
+          "size": 92
+        },
+        {
+          "name": "constructor",
+          "addr": "0x11f61b8",
+          "size": 12
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x11f51e0",
+          "size": 76
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1214d18",
+          "size": 12
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12247a8",
+          "size": 12
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1227668",
+          "size": 128
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1203590",
+          "size": 100
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12079d8",
+          "size": 100
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1213860",
+          "size": 12
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x120fce0",
+          "size": 128
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1214da0",
+          "size": 12
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1210090",
+          "size": 100
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1213e50",
+          "size": 76
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1213bb0",
+          "size": 100
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x120f2e8",
+          "size": 200
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1210180",
+          "size": 76
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12150e0",
+          "size": 120
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1207a40",
+          "size": 120
+        },
+        {
+          "name": "Init",
+          "addr": "0x12082c8",
+          "size": 92
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1207970",
+          "size": 100
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120f5a0",
+          "size": 76
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120c8e0",
+          "size": 12
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1213ae0",
+          "size": 100
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1203450",
+          "size": 12
+        },
+        {
+          "name": "Clear",
+          "addr": "0x11f62a0",
+          "size": 100
+        },
+        {
+          "name": "Init",
+          "addr": "0x11f6240",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x120f990",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x1207830",
+          "size": 92
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1214ee8",
+          "size": 100
+        },
+        {
+          "name": "Init",
+          "addr": "0x120f930",
+          "size": 92
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1207ab8",
+          "size": 76
+        },
+        {
+          "name": "Init",
+          "addr": "0x12271e0",
+          "size": 92
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1215090",
+          "size": 76
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120f910",
+          "size": 12
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120f5f0",
+          "size": 76
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1207b08",
+          "size": 76
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12078f0",
+          "size": 128
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12275e8",
+          "size": 128
+        },
+        {
+          "name": "Init",
+          "addr": "0x1207890",
+          "size": 92
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120fe58",
+          "size": 12
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1213970",
+          "size": 12
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x11f6308",
+          "size": 76
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1207280",
+          "size": 76
+        },
+        {
+          "name": "Clear",
+          "addr": "0x120fb68",
+          "size": 100
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1213db0",
+          "size": 160
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120fee0",
+          "size": 12
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120f550",
+          "size": 76
+        },
+        {
+          "name": "Init",
+          "addr": "0x12272a0",
+          "size": 92
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120f1d8",
+          "size": 12
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1215040",
+          "size": 76
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120f920",
+          "size": 12
+        },
+        {
+          "name": "Init",
+          "addr": "0x120ffc8",
+          "size": 92
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12138e8",
+          "size": 12
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12137d8",
+          "size": 12
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12082b8",
+          "size": 12
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1224720",
+          "size": 12
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1214f50",
+          "size": 100
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1210028",
+          "size": 100
+        },
+        {
+          "name": "Clear",
+          "addr": "0x120fbd0",
+          "size": 100
+        },
+        {
+          "name": "Init",
+          "addr": "0x1214e28",
+          "size": 92
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1207190",
+          "size": 100
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1206ef0",
+          "size": 76
+        },
+        {
+          "name": "Clear",
+          "addr": "0x120f3b0",
+          "size": 100
+        },
+        {
+          "name": "Clear",
+          "addr": "0x11f5100",
+          "size": 100
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1208328",
+          "size": 212
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1227470",
+          "size": 136
+        },
+        {
+          "name": "Init",
+          "addr": "0x120ff68",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x11f50a0",
+          "size": 92
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x11f5168",
+          "size": 120
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x120fc38",
+          "size": 164
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120f248",
+          "size": 160
+        },
+        {
+          "name": "Clear",
+          "addr": "0x120f4e8",
+          "size": 100
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1208478",
+          "size": 100
+        },
+        {
+          "name": "Init",
+          "addr": "0x1227180",
+          "size": 92
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1227570",
+          "size": 120
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12069e8",
+          "size": 12
+        },
+        {
+          "name": "Init",
+          "addr": "0x1227240",
+          "size": 92
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12071f8",
+          "size": 136
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1203a00",
+          "size": 120
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1203918",
+          "size": 76
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x11f6358",
+          "size": 120
+        },
+        {
+          "name": "Clear",
+          "addr": "0x120f480",
+          "size": 100
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1210220",
+          "size": 120
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x12084e0",
+          "size": 164
+        },
+        {
+          "name": "Clear",
+          "addr": "0x120f418",
+          "size": 100
+        },
+        {
+          "name": "Init",
+          "addr": "0x12020b8",
+          "size": 168
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1213b48",
+          "size": 136
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12276e8",
+          "size": 120
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120fd60",
+          "size": 168
+        },
+        {
+          "name": "Init",
+          "addr": "0x1213a80",
+          "size": 92
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1213ea0",
+          "size": 156
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120fe08",
+          "size": 76
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120f9f0",
+          "size": 12
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12100f8",
+          "size": 136
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12139f8",
+          "size": 12
+        },
+        {
+          "name": "Init",
+          "addr": "0x1214e88",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x120f1e8",
+          "size": 92
         }
       ]
     },
@@ -5728,6 +6972,495 @@
         }
       ]
     },
+    "VIList": {
+      "method_count": 48,
+      "total_size": 5028,
+      "subsystem": "Engine (VIList)",
+      "methods": [
+        {
+          "name": "Add",
+          "addr": "0x11f3c88",
+          "size": 144
+        },
+        {
+          "name": "Erase",
+          "addr": "0x11f3c00",
+          "size": 136
+        },
+        {
+          "name": "Init",
+          "addr": "0x1224830",
+          "size": 44
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1210640",
+          "size": 156
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12111a8",
+          "size": 16
+        },
+        {
+          "name": "Erase",
+          "addr": "0x12007b8",
+          "size": 136
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1209570",
+          "size": 16
+        },
+        {
+          "name": "Insert",
+          "addr": "0x12096b8",
+          "size": 192
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1211788",
+          "size": 100
+        },
+        {
+          "name": "Add",
+          "addr": "0x1211c80",
+          "size": 144
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1211e90",
+          "size": 136
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1200920",
+          "size": 16
+        },
+        {
+          "name": "Add",
+          "addr": "0x1225200",
+          "size": 112
+        },
+        {
+          "name": "Add",
+          "addr": "0x11fd1f0",
+          "size": 144
+        },
+        {
+          "name": "Add",
+          "addr": "0x1200998",
+          "size": 144
+        },
+        {
+          "name": "Erase",
+          "addr": "0x11fd138",
+          "size": 136
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1224368",
+          "size": 16
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1209778",
+          "size": 100
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1224a98",
+          "size": 100
+        },
+        {
+          "name": "constructor",
+          "addr": "0x11f3b60",
+          "size": 16
+        },
+        {
+          "name": "Add",
+          "addr": "0x12097e0",
+          "size": 144
+        },
+        {
+          "name": "Init",
+          "addr": "0x12114c8",
+          "size": 44
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1211140",
+          "size": 16
+        },
+        {
+          "name": "Insert",
+          "addr": "0x1210578",
+          "size": 192
+        },
+        {
+          "name": "Clear",
+          "addr": "0x11f3d30",
+          "size": 100
+        },
+        {
+          "name": "Add",
+          "addr": "0x1211d10",
+          "size": 140
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1211e08",
+          "size": 136
+        },
+        {
+          "name": "constructor",
+          "addr": "0x11fd1e0",
+          "size": 16
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1224a10",
+          "size": 132
+        },
+        {
+          "name": "Add",
+          "addr": "0x12106f0",
+          "size": 144
+        },
+        {
+          "name": "Erase",
+          "addr": "0x12109f0",
+          "size": 236
+        },
+        {
+          "name": "Init",
+          "addr": "0x12114f8",
+          "size": 44
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1209628",
+          "size": 136
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1211980",
+          "size": 188
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1210fa8",
+          "size": 16
+        },
+        {
+          "name": "Init",
+          "addr": "0x1224860",
+          "size": 44
+        },
+        {
+          "name": "constructor",
+          "addr": "0x12243d0",
+          "size": 16
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1225120",
+          "size": 188
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1211918",
+          "size": 100
+        },
+        {
+          "name": "Clear",
+          "addr": "0x11fd280",
+          "size": 100
+        },
+        {
+          "name": "Add",
+          "addr": "0x1211bf0",
+          "size": 144
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1200930",
+          "size": 100
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1225270",
+          "size": 156
+        },
+        {
+          "name": "Add",
+          "addr": "0x1225090",
+          "size": 140
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12005f8",
+          "size": 100
+        },
+        {
+          "name": "Insert",
+          "addr": "0x1200860",
+          "size": 192
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1210540",
+          "size": 16
+        },
+        {
+          "name": "Init",
+          "addr": "0x1211438",
+          "size": 44
+        }
+      ]
+    },
+    "VIMap": {
+      "method_count": 47,
+      "total_size": 15000,
+      "subsystem": "Engine (VIMap)",
+      "methods": [
+        {
+          "name": "Insert",
+          "addr": "0x1205798",
+          "size": 772
+        },
+        {
+          "name": "Clear",
+          "addr": "0x120a530",
+          "size": 116
+        },
+        {
+          "name": "Insert",
+          "addr": "0x12205d0",
+          "size": 1160
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x1226d68",
+          "size": 204
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x1209f50",
+          "size": 208
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1206dc8",
+          "size": 28
+        },
+        {
+          "name": "Insert",
+          "addr": "0x1226960",
+          "size": 772
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1213288",
+          "size": 28
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1205aa0",
+          "size": 512
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1206530",
+          "size": 340
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1220a58",
+          "size": 600
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x1226c68",
+          "size": 252
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1206688",
+          "size": 320
+        },
+        {
+          "name": "FreeNode",
+          "addr": "0x1206b50",
+          "size": 68
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x1221720",
+          "size": 240
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12068b8",
+          "size": 116
+        },
+        {
+          "name": "Init",
+          "addr": "0x120a4b8",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x1227060",
+          "size": 92
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x1209d80",
+          "size": 252
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12227c0",
+          "size": 116
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x1221518",
+          "size": 276
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x1226e38",
+          "size": 208
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x1205e90",
+          "size": 252
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12274f8",
+          "size": 116
+        },
+        {
+          "name": "EraseFixup",
+          "addr": "0x1221810",
+          "size": 1268
+        },
+        {
+          "name": "FreeNode",
+          "addr": "0x120a710",
+          "size": 68
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1225ec8",
+          "size": 88
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x1221630",
+          "size": 236
+        },
+        {
+          "name": "EraseFixup",
+          "addr": "0x120a020",
+          "size": 1020
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120a8e8",
+          "size": 88
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x1206060",
+          "size": 208
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1206c80",
+          "size": 176
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1222ac0",
+          "size": 192
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1213410",
+          "size": 88
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1209b80",
+          "size": 512
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12223a8",
+          "size": 488
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1226f08",
+          "size": 340
+        },
+        {
+          "name": "FreeNode",
+          "addr": "0x1222988",
+          "size": 76
+        },
+        {
+          "name": "EraseFixup",
+          "addr": "0x1206130",
+          "size": 1020
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x120a758",
+          "size": 396
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x12273c0",
+          "size": 176
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1225cc0",
+          "size": 28
+        },
+        {
+          "name": "Insert",
+          "addr": "0x1209870",
+          "size": 780
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x1205f90",
+          "size": 204
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x120a988",
+          "size": 176
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x1209e80",
+          "size": 204
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120a420",
+          "size": 28
+        }
+      ]
+    },
     "VIGUIObject": {
       "method_count": 47,
       "total_size": 2868,
@@ -7085,213 +8818,6 @@
         }
       ]
     },
-    "Base": {
-      "method_count": 40,
-      "total_size": 9680,
-      "subsystem": "Game Entities",
-      "methods": [
-        {
-          "name": "unpack",
-          "addr": "0x121fd60",
-          "size": 264
-        },
-        {
-          "name": "put",
-          "addr": "0x1053590",
-          "size": 76
-        },
-        {
-          "name": "get",
-          "addr": "0x1001830",
-          "size": 140
-        },
-        {
-          "name": "get",
-          "addr": "0x10537a8",
-          "size": 132
-        },
-        {
-          "name": "unpack",
-          "addr": "0x12201a0",
-          "size": 352
-        },
-        {
-          "name": "get",
-          "addr": "0x1053508",
-          "size": 132
-        },
-        {
-          "name": "get",
-          "addr": "0x1033b78",
-          "size": 164
-        },
-        {
-          "name": "put",
-          "addr": "0x1053830",
-          "size": 112
-        },
-        {
-          "name": "get",
-          "addr": "0x1052a48",
-          "size": 660
-        },
-        {
-          "name": "put",
-          "addr": "0x1033c20",
-          "size": 92
-        },
-        {
-          "name": "get",
-          "addr": "0x10535e0",
-          "size": 96
-        },
-        {
-          "name": "get",
-          "addr": "0x1052ea0",
-          "size": 620
-        },
-        {
-          "name": "get",
-          "addr": "0x1052658",
-          "size": 568
-        },
-        {
-          "name": "put",
-          "addr": "0x1053918",
-          "size": 88
-        },
-        {
-          "name": "unpack",
-          "addr": "0x121aad8",
-          "size": 284
-        },
-        {
-          "name": "put",
-          "addr": "0x1000be0",
-          "size": 76
-        },
-        {
-          "name": "get",
-          "addr": "0x1053110",
-          "size": 228
-        },
-        {
-          "name": "put",
-          "addr": "0x1052890",
-          "size": 436
-        },
-        {
-          "name": "get",
-          "addr": "0x10531f8",
-          "size": 212
-        },
-        {
-          "name": "put",
-          "addr": "0x1053640",
-          "size": 28
-        },
-        {
-          "name": "unpack",
-          "addr": "0x1201368",
-          "size": 460
-        },
-        {
-          "name": "get",
-          "addr": "0x1052040",
-          "size": 580
-        },
-        {
-          "name": "strlwr",
-          "addr": "0x10feba0",
-          "size": 72
-        },
-        {
-          "name": "strupr",
-          "addr": "0x10febe8",
-          "size": 72
-        },
-        {
-          "name": "unpack",
-          "addr": "0x121ad18",
-          "size": 284
-        },
-        {
-          "name": "unpack",
-          "addr": "0x1200fe8",
-          "size": 356
-        },
-        {
-          "name": "get",
-          "addr": "0x1052358",
-          "size": 384
-        },
-        {
-          "name": "put",
-          "addr": "0x1053788",
-          "size": 28
-        },
-        {
-          "name": "put",
-          "addr": "0x10524d8",
-          "size": 380
-        },
-        {
-          "name": "get",
-          "addr": "0x1053660",
-          "size": 132
-        },
-        {
-          "name": "get",
-          "addr": "0x1053730",
-          "size": 84
-        },
-        {
-          "name": "put",
-          "addr": "0x1051ed0",
-          "size": 364
-        },
-        {
-          "name": "put",
-          "addr": "0x10538a0",
-          "size": 116
-        },
-        {
-          "name": "get",
-          "addr": "0x10532d0",
-          "size": 184
-        },
-        {
-          "name": "unpack",
-          "addr": "0x1201760",
-          "size": 384
-        },
-        {
-          "name": "put",
-          "addr": "0x1052ce0",
-          "size": 448
-        },
-        {
-          "name": "put",
-          "addr": "0x10534e8",
-          "size": 28
-        },
-        {
-          "name": "put",
-          "addr": "0x10536e8",
-          "size": 72
-        },
-        {
-          "name": "unpack",
-          "addr": "0x121abf8",
-          "size": 284
-        },
-        {
-          "name": "put",
-          "addr": "0x1052288",
-          "size": 208
-        }
-      ]
-    },
     "ostream": {
       "method_count": 39,
       "total_size": 3720,
@@ -8095,6 +9621,203 @@
         }
       ]
     },
+    "_Rb_tree": {
+      "method_count": 38,
+      "total_size": 21164,
+      "subsystem": "Other",
+      "methods": [
+        {
+          "name": "lower_bound",
+          "addr": "0x11f7288",
+          "size": 124
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11fb0a8",
+          "size": 552
+        },
+        {
+          "name": "lower_bound",
+          "addr": "0x11facf0",
+          "size": 72
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11fba68",
+          "size": 428
+        },
+        {
+          "name": "upper_bound",
+          "addr": "0x11fcfa8",
+          "size": 72
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11fc228",
+          "size": 372
+        },
+        {
+          "name": "_M_erase",
+          "addr": "0x11f6858",
+          "size": 604
+        },
+        {
+          "name": "_M_insert",
+          "addr": "0x1204cf0",
+          "size": 1104
+        },
+        {
+          "name": "lower_bound",
+          "addr": "0x11fcf60",
+          "size": 72
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11f75d0",
+          "size": 372
+        },
+        {
+          "name": "_M_erase",
+          "addr": "0x11f6ab8",
+          "size": 508
+        },
+        {
+          "name": "_M_insert",
+          "addr": "0x11f9e18",
+          "size": 1080
+        },
+        {
+          "name": "_M_insert",
+          "addr": "0x11f93c8",
+          "size": 2204
+        },
+        {
+          "name": "lower_bound",
+          "addr": "0x11fb028",
+          "size": 124
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11f9250",
+          "size": 372
+        },
+        {
+          "name": "erase",
+          "addr": "0x11fc3a0",
+          "size": 408
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11f6eb8",
+          "size": 448
+        },
+        {
+          "name": "erase",
+          "addr": "0x11fc8b8",
+          "size": 1700
+        },
+        {
+          "name": "lower_bound",
+          "addr": "0x11faba8",
+          "size": 72
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11f73a8",
+          "size": 552
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11fc068",
+          "size": 372
+        },
+        {
+          "name": "_M_erase",
+          "addr": "0x11fae70",
+          "size": 108
+        },
+        {
+          "name": "_M_erase",
+          "addr": "0x11faee0",
+          "size": 108
+        },
+        {
+          "name": "erase",
+          "addr": "0x11fa250",
+          "size": 1700
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11fb3f0",
+          "size": 448
+        },
+        {
+          "name": "find",
+          "addr": "0x12052e8",
+          "size": 116
+        },
+        {
+          "name": "_M_insert",
+          "addr": "0x11fc538",
+          "size": 896
+        },
+        {
+          "name": "upper_bound",
+          "addr": "0x11fad38",
+          "size": 72
+        },
+        {
+          "name": "_M_erase",
+          "addr": "0x11fab38",
+          "size": 108
+        },
+        {
+          "name": "_M_erase",
+          "addr": "0x12041e8",
+          "size": 108
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x11f9c68",
+          "size": 428
+        },
+        {
+          "name": "_M_erase",
+          "addr": "0x11faf50",
+          "size": 212
+        },
+        {
+          "name": "_M_insert",
+          "addr": "0x11fbc18",
+          "size": 1104
+        },
+        {
+          "name": "erase",
+          "addr": "0x11f7748",
+          "size": 408
+        },
+        {
+          "name": "lower_bound",
+          "addr": "0x11fc1e0",
+          "size": 72
+        },
+        {
+          "name": "_M_insert",
+          "addr": "0x11f8a28",
+          "size": 2084
+        },
+        {
+          "name": "_M_insert",
+          "addr": "0x11fb5b0",
+          "size": 1208
+        },
+        {
+          "name": "insert_unique",
+          "addr": "0x1204810",
+          "size": 372
+        }
+      ]
+    },
     "VIWndEdit": {
       "method_count": 38,
       "total_size": 12888,
@@ -8481,6 +10204,198 @@
           "name": "Eof",
           "addr": "0x10caf78",
           "size": 48
+        }
+      ]
+    },
+    "VIMultiMap": {
+      "method_count": 37,
+      "total_size": 11864,
+      "subsystem": "Engine (VIMultiMap)",
+      "methods": [
+        {
+          "name": "DestroyPool",
+          "addr": "0x1213468",
+          "size": 320
+        },
+        {
+          "name": "FreeNode",
+          "addr": "0x1225438",
+          "size": 68
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x1221ed8",
+          "size": 208
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x11f4468",
+          "size": 204
+        },
+        {
+          "name": "EraseFixup",
+          "addr": "0x11f4608",
+          "size": 1020
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1222b80",
+          "size": 176
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12226e0",
+          "size": 116
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1226508",
+          "size": 116
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1223650",
+          "size": 512
+        },
+        {
+          "name": "EraseFixup",
+          "addr": "0x1221fa8",
+          "size": 1020
+        },
+        {
+          "name": "Erase",
+          "addr": "0x11f4168",
+          "size": 512
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x1223950",
+          "size": 252
+        },
+        {
+          "name": "Init",
+          "addr": "0x1226440",
+          "size": 92
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x11f4fa8",
+          "size": 176
+        },
+        {
+          "name": "FreeNode",
+          "addr": "0x12229d8",
+          "size": 68
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x1221d08",
+          "size": 252
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1223ff0",
+          "size": 332
+        },
+        {
+          "name": "FreeNode",
+          "addr": "0x11f4f20",
+          "size": 136
+        },
+        {
+          "name": "Insert",
+          "addr": "0x1223258",
+          "size": 756
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1224140",
+          "size": 88
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x1225520",
+          "size": 176
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x11f4a08",
+          "size": 376
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1224fd0",
+          "size": 28
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x1223a50",
+          "size": 204
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1226698",
+          "size": 116
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x11f4b80",
+          "size": 132
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1222590",
+          "size": 332
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x1223b20",
+          "size": 208
+        },
+        {
+          "name": "Erase",
+          "addr": "0x1220fa8",
+          "size": 512
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x11f4538",
+          "size": 208
+        },
+        {
+          "name": "Insert",
+          "addr": "0x1220cb0",
+          "size": 756
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x1221e08",
+          "size": 204
+        },
+        {
+          "name": "Init",
+          "addr": "0x1226638",
+          "size": 92
+        },
+        {
+          "name": "Insert",
+          "addr": "0x11f3e48",
+          "size": 796
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x11f4368",
+          "size": 252
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1213320",
+          "size": 28
+        },
+        {
+          "name": "EraseFixup",
+          "addr": "0x1223bf0",
+          "size": 1020
         }
       ]
     },
@@ -9182,6 +11097,173 @@
         }
       ]
     },
+    "Base": {
+      "method_count": 32,
+      "total_size": 7012,
+      "subsystem": "Networking",
+      "methods": [
+        {
+          "name": "put",
+          "addr": "0x1053590",
+          "size": 76
+        },
+        {
+          "name": "get",
+          "addr": "0x1001830",
+          "size": 140
+        },
+        {
+          "name": "get",
+          "addr": "0x10537a8",
+          "size": 132
+        },
+        {
+          "name": "get",
+          "addr": "0x1053508",
+          "size": 132
+        },
+        {
+          "name": "get",
+          "addr": "0x1033b78",
+          "size": 164
+        },
+        {
+          "name": "put",
+          "addr": "0x1053830",
+          "size": 112
+        },
+        {
+          "name": "get",
+          "addr": "0x1052a48",
+          "size": 660
+        },
+        {
+          "name": "put",
+          "addr": "0x1033c20",
+          "size": 92
+        },
+        {
+          "name": "get",
+          "addr": "0x10535e0",
+          "size": 96
+        },
+        {
+          "name": "get",
+          "addr": "0x1052ea0",
+          "size": 620
+        },
+        {
+          "name": "get",
+          "addr": "0x1052658",
+          "size": 568
+        },
+        {
+          "name": "put",
+          "addr": "0x1053918",
+          "size": 88
+        },
+        {
+          "name": "put",
+          "addr": "0x1000be0",
+          "size": 76
+        },
+        {
+          "name": "get",
+          "addr": "0x1053110",
+          "size": 228
+        },
+        {
+          "name": "put",
+          "addr": "0x1052890",
+          "size": 436
+        },
+        {
+          "name": "get",
+          "addr": "0x10531f8",
+          "size": 212
+        },
+        {
+          "name": "put",
+          "addr": "0x1053640",
+          "size": 28
+        },
+        {
+          "name": "get",
+          "addr": "0x1052040",
+          "size": 580
+        },
+        {
+          "name": "strlwr",
+          "addr": "0x10feba0",
+          "size": 72
+        },
+        {
+          "name": "strupr",
+          "addr": "0x10febe8",
+          "size": 72
+        },
+        {
+          "name": "get",
+          "addr": "0x1052358",
+          "size": 384
+        },
+        {
+          "name": "put",
+          "addr": "0x1053788",
+          "size": 28
+        },
+        {
+          "name": "put",
+          "addr": "0x10524d8",
+          "size": 380
+        },
+        {
+          "name": "get",
+          "addr": "0x1053660",
+          "size": 132
+        },
+        {
+          "name": "get",
+          "addr": "0x1053730",
+          "size": 84
+        },
+        {
+          "name": "put",
+          "addr": "0x1051ed0",
+          "size": 364
+        },
+        {
+          "name": "put",
+          "addr": "0x10538a0",
+          "size": 116
+        },
+        {
+          "name": "get",
+          "addr": "0x10532d0",
+          "size": 184
+        },
+        {
+          "name": "put",
+          "addr": "0x1052ce0",
+          "size": 448
+        },
+        {
+          "name": "put",
+          "addr": "0x10534e8",
+          "size": 28
+        },
+        {
+          "name": "put",
+          "addr": "0x10536e8",
+          "size": 72
+        },
+        {
+          "name": "put",
+          "addr": "0x1052288",
+          "size": 208
+        }
+      ]
+    },
     "VIWndMcErr": {
       "method_count": 31,
       "total_size": 12640,
@@ -9504,7 +11586,7 @@
     "GameObject": {
       "method_count": 30,
       "total_size": 5788,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "findTagString",
@@ -9959,6 +12041,153 @@
           "name": "ResetLightning",
           "addr": "0x106b700",
           "size": 220
+        }
+      ]
+    },
+    "vector": {
+      "method_count": 28,
+      "total_size": 21352,
+      "subsystem": "Networking",
+      "methods": [
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x11fec98",
+          "size": 620
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x121bd10",
+          "size": 604
+        },
+        {
+          "name": "__as",
+          "addr": "0x11f6498",
+          "size": 960
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x121bb28",
+          "size": 484
+        },
+        {
+          "name": "__as",
+          "addr": "0x1215408",
+          "size": 712
+        },
+        {
+          "name": "__as",
+          "addr": "0x11fe3f0",
+          "size": 712
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x1214280",
+          "size": 620
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x1214018",
+          "size": 612
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x11fd8d0",
+          "size": 620
+        },
+        {
+          "name": "__as",
+          "addr": "0x11f8640",
+          "size": 1000
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x121b4d8",
+          "size": 484
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x11f2950",
+          "size": 484
+        },
+        {
+          "name": "__as",
+          "addr": "0x120be18",
+          "size": 712
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x12144f0",
+          "size": 620
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x1204460",
+          "size": 608
+        },
+        {
+          "name": "insert",
+          "addr": "0x120c350",
+          "size": 860
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x11fef08",
+          "size": 696
+        },
+        {
+          "name": "__as",
+          "addr": "0x11fe6b8",
+          "size": 712
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x121b020",
+          "size": 1208
+        },
+        {
+          "name": "__as",
+          "addr": "0x1215158",
+          "size": 688
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x11f3130",
+          "size": 484
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x121ae38",
+          "size": 484
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x11f7d50",
+          "size": 2288
+        },
+        {
+          "name": "__as",
+          "addr": "0x120c0e0",
+          "size": 620
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x11f7a10",
+          "size": 832
+        },
+        {
+          "name": "__as",
+          "addr": "0x11fe980",
+          "size": 792
+        },
+        {
+          "name": "_M_insert_aux",
+          "addr": "0x121b6c0",
+          "size": 1124
+        },
+        {
+          "name": "__as",
+          "addr": "0x12156d0",
+          "size": 712
         }
       ]
     },
@@ -10956,6 +13185,138 @@
         }
       ]
     },
+    "VIVector": {
+      "method_count": 25,
+      "total_size": 4348,
+      "subsystem": "Engine (VIVector)",
+      "methods": [
+        {
+          "name": "DestroyPool",
+          "addr": "0x12029e8",
+          "size": 172
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1226110",
+          "size": 220
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1203528",
+          "size": 104
+        },
+        {
+          "name": "Clear",
+          "addr": "0x1224ed8",
+          "size": 104
+        },
+        {
+          "name": "Add",
+          "addr": "0x1202930",
+          "size": 180
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x12031a8",
+          "size": 224
+        },
+        {
+          "name": "Init",
+          "addr": "0x12270c0",
+          "size": 92
+        },
+        {
+          "name": "Init",
+          "addr": "0x1224f40",
+          "size": 140
+        },
+        {
+          "name": "Add",
+          "addr": "0x1225d30",
+          "size": 144
+        },
+        {
+          "name": "Init",
+          "addr": "0x1201fd8",
+          "size": 168
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1203880",
+          "size": 152
+        },
+        {
+          "name": "Init",
+          "addr": "0x1201da8",
+          "size": 504
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1226318",
+          "size": 76
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1202f78",
+          "size": 560
+        },
+        {
+          "name": "Init",
+          "addr": "0x1227120",
+          "size": 92
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12264a0",
+          "size": 104
+        },
+        {
+          "name": "Clear",
+          "addr": "0x12034c0",
+          "size": 104
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1203430",
+          "size": 16
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x1213cc0",
+          "size": 284
+        },
+        {
+          "name": "Add",
+          "addr": "0x1213c18",
+          "size": 168
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1224698",
+          "size": 16
+        },
+        {
+          "name": "constructor",
+          "addr": "0x1203440",
+          "size": 16
+        },
+        {
+          "name": "Add",
+          "addr": "0x1202710",
+          "size": 540
+        },
+        {
+          "name": "Init",
+          "addr": "0x12263e0",
+          "size": 92
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x1213f40",
+          "size": 76
+        }
+      ]
+    },
     "ios": {
       "method_count": 24,
       "total_size": 932,
@@ -11335,7 +13696,7 @@
     "WoodElfSoldier": {
       "method_count": 22,
       "total_size": 12516,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "setState",
@@ -12517,7 +14878,7 @@
     "Skill": {
       "method_count": 17,
       "total_size": 1696,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getEnergyCost",
@@ -14413,7 +16774,7 @@
     "Cat": {
       "method_count": 13,
       "total_size": 4552,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -14485,7 +16846,7 @@
     "Critter": {
       "method_count": 13,
       "total_size": 8704,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_hurt",
@@ -15061,7 +17422,7 @@
     "AutoProp": {
       "method_count": 13,
       "total_size": 4708,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "setPassableState",
@@ -15205,7 +17566,7 @@
     "AntQueen": {
       "method_count": 13,
       "total_size": 8532,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -15421,7 +17782,7 @@
     "Container": {
       "method_count": 13,
       "total_size": 5680,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_run",
@@ -15766,7 +18127,7 @@
     "Savepoint": {
       "method_count": 12,
       "total_size": 5224,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "saveActivate",
@@ -16101,7 +18462,7 @@
     "LavaMonster": {
       "method_count": 12,
       "total_size": 10288,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -16168,7 +18529,7 @@
     "VampireLord": {
       "method_count": 12,
       "total_size": 14372,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "convertToBat",
@@ -16302,7 +18663,7 @@
     "Cyclops": {
       "method_count": 12,
       "total_size": 7124,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -16694,7 +19055,7 @@
     "Demon": {
       "method_count": 11,
       "total_size": 6596,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -16756,7 +19117,7 @@
     "FemaleDarkElf": {
       "method_count": 11,
       "total_size": 8824,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "setState",
@@ -17190,7 +19551,7 @@
     "DoorSwing": {
       "method_count": 11,
       "total_size": 2552,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "clone",
@@ -17373,6 +19734,68 @@
         }
       ]
     },
+    "VISet": {
+      "method_count": 11,
+      "total_size": 3636,
+      "subsystem": "Engine (VISet)",
+      "methods": [
+        {
+          "name": "Insert",
+          "addr": "0x120ad38",
+          "size": 748
+        },
+        {
+          "name": "RightRotate",
+          "addr": "0x120b3f8",
+          "size": 208
+        },
+        {
+          "name": "constructor",
+          "addr": "0x120ba18",
+          "size": 28
+        },
+        {
+          "name": "LeftRotate",
+          "addr": "0x120b328",
+          "size": 204
+        },
+        {
+          "name": "LinkFreeChain",
+          "addr": "0x120bb78",
+          "size": 176
+        },
+        {
+          "name": "Allocate",
+          "addr": "0x120b8c8",
+          "size": 332
+        },
+        {
+          "name": "AddNode",
+          "addr": "0x120b228",
+          "size": 252
+        },
+        {
+          "name": "Erase",
+          "addr": "0x120b028",
+          "size": 512
+        },
+        {
+          "name": "EraseFixup",
+          "addr": "0x120b4c8",
+          "size": 1020
+        },
+        {
+          "name": "FreeNode",
+          "addr": "0x120bb30",
+          "size": 68
+        },
+        {
+          "name": "DestroyPool",
+          "addr": "0x120bc28",
+          "size": 88
+        }
+      ]
+    },
     "TcpConnection": {
       "method_count": 11,
       "total_size": 3044,
@@ -17438,7 +19861,7 @@
     "Generator": {
       "method_count": 11,
       "total_size": 3516,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_run",
@@ -17624,7 +20047,7 @@
     "Froglock": {
       "method_count": 11,
       "total_size": 8356,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -17810,7 +20233,7 @@
     "MummyKing": {
       "method_count": 10,
       "total_size": 6952,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "bSpawnSnake",
@@ -17867,7 +20290,7 @@
     "DoorSecret": {
       "method_count": 10,
       "total_size": 1788,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_save",
@@ -17981,7 +20404,7 @@
     "SkillCriticalHit": {
       "method_count": 10,
       "total_size": 1336,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -18038,7 +20461,7 @@
     "SkillSummonSkeleton": {
       "method_count": 10,
       "total_size": 2520,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "constructor",
@@ -18095,7 +20518,7 @@
     "SkillColdWeapons": {
       "method_count": 10,
       "total_size": 1104,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getIcon",
@@ -18152,7 +20575,7 @@
     "SuperOrc": {
       "method_count": 10,
       "total_size": 7944,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_hurt",
@@ -18209,7 +20632,7 @@
     "Wraith": {
       "method_count": 10,
       "total_size": 7056,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -18266,7 +20689,7 @@
     "SpiderQueen": {
       "method_count": 10,
       "total_size": 10760,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "canGrab",
@@ -18494,7 +20917,7 @@
     "Ant": {
       "method_count": 10,
       "total_size": 8148,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_load",
@@ -18551,7 +20974,7 @@
     "CloudGiant": {
       "method_count": 10,
       "total_size": 10860,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_load",
@@ -18608,7 +21031,7 @@
     "Chest": {
       "method_count": 10,
       "total_size": 4956,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_run",
@@ -18665,7 +21088,7 @@
     "SkillFireWeapons": {
       "method_count": 10,
       "total_size": 1100,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "canCast",
@@ -18893,7 +21316,7 @@
     "SkillDiseaseBolt": {
       "method_count": 10,
       "total_size": 904,
-      "subsystem": "Math",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "cast",
@@ -19064,7 +21487,7 @@
     "Innoruuk": {
       "method_count": 10,
       "total_size": 16888,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "updateEnemy",
@@ -19121,7 +21544,7 @@
     "SkillBlessed": {
       "method_count": 10,
       "total_size": 700,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "initRamps",
@@ -19178,7 +21601,7 @@
     "SkillConeOfFire": {
       "method_count": 10,
       "total_size": 712,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getSkillPointCost",
@@ -19235,7 +21658,7 @@
     "SkillDiseaseShield": {
       "method_count": 10,
       "total_size": 1016,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -19292,7 +21715,7 @@
     "SkillFireStorm": {
       "method_count": 10,
       "total_size": 1392,
-      "subsystem": "Math",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "cast",
@@ -19349,7 +21772,7 @@
     "UndeadKnight": {
       "method_count": 10,
       "total_size": 7352,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_trigger",
@@ -19406,7 +21829,7 @@
     "SkillShockOfFrost": {
       "method_count": 10,
       "total_size": 1040,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getIcon",
@@ -19463,7 +21886,7 @@
     "JumpGate": {
       "method_count": 10,
       "total_size": 5628,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_poke",
@@ -19520,7 +21943,7 @@
     "SkillBlindingLight": {
       "method_count": 10,
       "total_size": 1076,
-      "subsystem": "Lighting",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -19634,7 +22057,7 @@
     "SkillRangerCriticalHit": {
       "method_count": 10,
       "total_size": 1448,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getLevelRequirement",
@@ -19691,7 +22114,7 @@
     "SkillUndeadShield": {
       "method_count": 10,
       "total_size": 712,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -19859,10 +22282,67 @@
         }
       ]
     },
+    "basic_string": {
+      "method_count": 10,
+      "total_size": 5308,
+      "subsystem": "C++ Stdlib",
+      "methods": [
+        {
+          "name": "alloc",
+          "addr": "0x11ff550",
+          "size": 488
+        },
+        {
+          "name": "replace",
+          "addr": "0x11f78e0",
+          "size": 304
+        },
+        {
+          "name": "replace",
+          "addr": "0x11ffa88",
+          "size": 976
+        },
+        {
+          "name": "replace",
+          "addr": "0x1209130",
+          "size": 888
+        },
+        {
+          "name": "replace",
+          "addr": "0x11f2e88",
+          "size": 676
+        },
+        {
+          "name": "resize",
+          "addr": "0x1209080",
+          "size": 88
+        },
+        {
+          "name": "replace",
+          "addr": "0x11fd440",
+          "size": 956
+        },
+        {
+          "name": "replace",
+          "addr": "0x11ff950",
+          "size": 308
+        },
+        {
+          "name": "alloc",
+          "addr": "0x11ff738",
+          "size": 536
+        },
+        {
+          "name": "resize",
+          "addr": "0x12090d8",
+          "size": 88
+        }
+      ]
+    },
     "SkillHolyStrike": {
       "method_count": 10,
       "total_size": 1096,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "constructor",
@@ -19976,7 +22456,7 @@
     "SkillHammerOfWrath": {
       "method_count": 10,
       "total_size": 1364,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getSkillPointCost",
@@ -20090,7 +22570,7 @@
     "SkillFireFlares": {
       "method_count": 10,
       "total_size": 1272,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getLevelRequirement",
@@ -20147,7 +22627,7 @@
     "SkillDiseaseTrail": {
       "method_count": 10,
       "total_size": 904,
-      "subsystem": "Particles",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getIcon",
@@ -20204,7 +22684,7 @@
     "Lever": {
       "method_count": 10,
       "total_size": 1760,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_save",
@@ -20261,7 +22741,7 @@
     "AutoChest": {
       "method_count": 9,
       "total_size": 5692,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_load",
@@ -20469,7 +22949,7 @@
     "SkillBash": {
       "method_count": 9,
       "total_size": 1036,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "canCast",
@@ -20521,7 +23001,7 @@
     "SkillLifeTap": {
       "method_count": 9,
       "total_size": 700,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -20625,7 +23105,7 @@
     "SkillWizardBeam": {
       "method_count": 9,
       "total_size": 956,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getLevelRequirement",
@@ -20885,7 +23365,7 @@
     "SkillShieldBash": {
       "method_count": 9,
       "total_size": 992,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "constructor",
@@ -21145,7 +23625,7 @@
     "SeaMonster": {
       "method_count": 9,
       "total_size": 3116,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -21301,7 +23781,7 @@
     "SkillDismissUndead": {
       "method_count": 9,
       "total_size": 808,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -21457,7 +23937,7 @@
     "Ghoul": {
       "method_count": 9,
       "total_size": 6588,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -21613,7 +24093,7 @@
     "SkillDarkness": {
       "method_count": 9,
       "total_size": 900,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -21769,7 +24249,7 @@
     "SkillRepulseUndead": {
       "method_count": 9,
       "total_size": 1196,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "initRamps",
@@ -21821,7 +24301,7 @@
     "Wheel": {
       "method_count": 9,
       "total_size": 1968,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_run",
@@ -21977,7 +24457,7 @@
     "Arenabeast": {
       "method_count": 9,
       "total_size": 6044,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -22029,7 +24509,7 @@
     "SkillPoisonRain": {
       "method_count": 9,
       "total_size": 1100,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -22185,7 +24665,7 @@
     "CosmeticPropAnim": {
       "method_count": 9,
       "total_size": 1844,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_save",
@@ -22289,7 +24769,7 @@
     "SkillCyclone": {
       "method_count": 9,
       "total_size": 812,
-      "subsystem": "Math",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "cast",
@@ -22393,7 +24873,7 @@
     "SpellAncestralCall": {
       "method_count": 8,
       "total_size": 3840,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "getAttackSpeedScale",
@@ -22440,7 +24920,7 @@
     "SkillConvertUndead": {
       "method_count": 8,
       "total_size": 980,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getEnergyCost",
@@ -22628,7 +25108,7 @@
     "SkillAncestralCall": {
       "method_count": 8,
       "total_size": 936,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getIcon",
@@ -22675,7 +25155,7 @@
     "FireFly": {
       "method_count": 8,
       "total_size": 3584,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -22722,7 +25202,7 @@
     "Trigger": {
       "method_count": 8,
       "total_size": 1656,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_load",
@@ -22816,7 +25296,7 @@
     "SkillClericRoot": {
       "method_count": 8,
       "total_size": 1012,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getLevelRequirement",
@@ -22863,7 +25343,7 @@
     "ShockProjectile": {
       "method_count": 8,
       "total_size": 4556,
-      "subsystem": "Other",
+      "subsystem": "Projectiles",
       "methods": [
         {
           "name": "clone",
@@ -23004,7 +25484,7 @@
     "BlackWidow": {
       "method_count": 8,
       "total_size": 7592,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -23145,7 +25625,7 @@
     "Scorpion": {
       "method_count": 8,
       "total_size": 5048,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -23192,7 +25672,7 @@
     "SkillRegeneration": {
       "method_count": 8,
       "total_size": 400,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -23239,7 +25719,7 @@
     "SkillMinorHealing": {
       "method_count": 8,
       "total_size": 560,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "constructor",
@@ -23286,7 +25766,7 @@
     "MissileWeapon": {
       "method_count": 8,
       "total_size": 10244,
-      "subsystem": "Other",
+      "subsystem": "Projectiles",
       "methods": [
         {
           "name": "msg_run",
@@ -23380,7 +25860,7 @@
     "CosmeticProp": {
       "method_count": 8,
       "total_size": 1396,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_save",
@@ -23427,7 +25907,7 @@
     "SkillRoot": {
       "method_count": 8,
       "total_size": 1060,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getLevelRequirement",
@@ -23568,7 +26048,7 @@
     "SkillEntangle": {
       "method_count": 8,
       "total_size": 1016,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -23615,7 +26095,7 @@
     "UserParamProp": {
       "method_count": 8,
       "total_size": 1836,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_getPokeName",
@@ -23803,7 +26283,7 @@
     "SkillGroundPound": {
       "method_count": 8,
       "total_size": 1128,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "initRamps",
@@ -23850,7 +26330,7 @@
     "SkillShockOfFire": {
       "method_count": 8,
       "total_size": 1168,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -23991,7 +26471,7 @@
     "SkillRiposte": {
       "method_count": 8,
       "total_size": 1660,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -24038,7 +26518,7 @@
     "SkillHealing": {
       "method_count": 8,
       "total_size": 848,
-      "subsystem": "Math",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "cast",
@@ -24221,7 +26701,7 @@
     "SkillShock": {
       "method_count": 7,
       "total_size": 756,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "constructor",
@@ -24263,7 +26743,7 @@
     "SkillPoisonArrow": {
       "method_count": 7,
       "total_size": 896,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getEnergyCost",
@@ -24557,7 +27037,7 @@
     "Nightmare": {
       "method_count": 7,
       "total_size": 1648,
-      "subsystem": "Math",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "turnToFace",
@@ -24641,7 +27121,7 @@
     "SkillMultiFire": {
       "method_count": 7,
       "total_size": 2000,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -24683,7 +27163,7 @@
     "Shooter": {
       "method_count": 7,
       "total_size": 2580,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_save",
@@ -24767,7 +27247,7 @@
     "Rondo": {
       "method_count": 7,
       "total_size": 2548,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -24935,7 +27415,7 @@
     "SkillHarmTouch": {
       "method_count": 7,
       "total_size": 648,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "initRamps",
@@ -25103,7 +27583,7 @@
     "SkillCharge": {
       "method_count": 7,
       "total_size": 1336,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getEnergyCost",
@@ -25229,7 +27709,7 @@
     "Clock": {
       "method_count": 7,
       "total_size": 400,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "reset",
@@ -25271,7 +27751,7 @@
     "WebTrap": {
       "method_count": 7,
       "total_size": 4448,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "~destructor",
@@ -25481,7 +27961,7 @@
     "SkillFrostStorm": {
       "method_count": 7,
       "total_size": 1220,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getEnergyCost",
@@ -25649,7 +28129,7 @@
     "SkillConeOfFrost": {
       "method_count": 7,
       "total_size": 708,
-      "subsystem": "Math",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "cast",
@@ -25691,7 +28171,7 @@
     "HateProjectile": {
       "method_count": 7,
       "total_size": 4604,
-      "subsystem": "Other",
+      "subsystem": "Projectiles",
       "methods": [
         {
           "name": "msg_run",
@@ -25733,7 +28213,7 @@
     "ColdArrowProjectile": {
       "method_count": 7,
       "total_size": 5140,
-      "subsystem": "Other",
+      "subsystem": "Projectiles",
       "methods": [
         {
           "name": "msg_run",
@@ -25901,7 +28381,7 @@
     "SkillConvertEnemy": {
       "method_count": 7,
       "total_size": 712,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -25985,7 +28465,7 @@
     "SkillFireArrow": {
       "method_count": 7,
       "total_size": 780,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -26069,7 +28549,7 @@
     "SkillHolyShield": {
       "method_count": 7,
       "total_size": 736,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "initRamps",
@@ -26111,7 +28591,7 @@
     "SkillColdArrow": {
       "method_count": 7,
       "total_size": 800,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -26153,7 +28633,7 @@
     "FloorSwitch": {
       "method_count": 7,
       "total_size": 1660,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_load",
@@ -26363,7 +28843,7 @@
     "SkillExplodeArrow": {
       "method_count": 7,
       "total_size": 848,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "initRamps",
@@ -26405,7 +28885,7 @@
     "SpellCharge": {
       "method_count": 6,
       "total_size": 4216,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "hitSomething",
@@ -26516,7 +28996,7 @@
     "DiseaseBolt": {
       "method_count": 6,
       "total_size": 4988,
-      "subsystem": "Other",
+      "subsystem": "Projectiles",
       "methods": [
         {
           "name": "~destructor",
@@ -26553,7 +29033,7 @@
     "MissileTrap": {
       "method_count": 6,
       "total_size": 1280,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_trigger",
@@ -26590,7 +29070,7 @@
     "AutoChestLP": {
       "method_count": 6,
       "total_size": 732,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_run",
@@ -26701,7 +29181,7 @@
     "SkillArchery": {
       "method_count": 6,
       "total_size": 468,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -26738,7 +29218,7 @@
     "Mermaid": {
       "method_count": 6,
       "total_size": 1240,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -26775,7 +29255,7 @@
     "IceBall": {
       "method_count": 6,
       "total_size": 2472,
-      "subsystem": "Other",
+      "subsystem": "Projectiles",
       "methods": [
         {
           "name": "msg_run",
@@ -26812,7 +29292,7 @@
     "SpellShieldBash": {
       "method_count": 6,
       "total_size": 2756,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "~destructor",
@@ -26997,7 +29477,7 @@
     "PushTrigger": {
       "method_count": 6,
       "total_size": 1252,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_poke",
@@ -27108,7 +29588,7 @@
     "UndeadKnightClone": {
       "method_count": 6,
       "total_size": 8396,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -27256,7 +29736,7 @@
     "LooseFire": {
       "method_count": 6,
       "total_size": 1388,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "~destructor",
@@ -27626,7 +30106,7 @@
     "GnomeNavigator": {
       "method_count": 6,
       "total_size": 2032,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -27663,7 +30143,7 @@
     "Spell": {
       "method_count": 6,
       "total_size": 252,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -27700,7 +30180,7 @@
     "SpellBash": {
       "method_count": 6,
       "total_size": 2748,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -27959,7 +30439,7 @@
     "SkillDodge": {
       "method_count": 6,
       "total_size": 480,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getEnergyCost",
@@ -28181,7 +30661,7 @@
     "FireTrail": {
       "method_count": 6,
       "total_size": 1908,
-      "subsystem": "Particles",
+      "subsystem": "Other",
       "methods": [
         {
           "name": "msg_run",
@@ -28388,7 +30868,7 @@
     "FireTrailMaker": {
       "method_count": 5,
       "total_size": 2168,
-      "subsystem": "Particles",
+      "subsystem": "Other",
       "methods": [
         {
           "name": "clone",
@@ -28484,7 +30964,7 @@
     "SpellCyclone": {
       "method_count": 5,
       "total_size": 4016,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -28516,7 +30996,7 @@
     "SpellCriticalHit": {
       "method_count": 5,
       "total_size": 2000,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "constructor",
@@ -28548,7 +31028,7 @@
     "Boat": {
       "method_count": 5,
       "total_size": 1332,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "set",
@@ -28644,7 +31124,7 @@
     "SpellUndeadShield": {
       "method_count": 5,
       "total_size": 2728,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "constructor",
@@ -28708,7 +31188,7 @@
     "SpellRangerCriticalHit": {
       "method_count": 5,
       "total_size": 1976,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "constructor",
@@ -28804,7 +31284,7 @@
     "SpellHarmTouch": {
       "method_count": 5,
       "total_size": 1448,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "constructor",
@@ -28964,7 +31444,7 @@
     "AutoPropLP": {
       "method_count": 5,
       "total_size": 3756,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "~destructor",
@@ -28996,7 +31476,7 @@
     "dustCloud": {
       "method_count": 5,
       "total_size": 1776,
-      "subsystem": "Other",
+      "subsystem": "Projectiles",
       "methods": [
         {
           "name": "clone",
@@ -29124,7 +31604,7 @@
     "Trap": {
       "method_count": 5,
       "total_size": 748,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_run",
@@ -29220,7 +31700,7 @@
     "SpellBlessed": {
       "method_count": 5,
       "total_size": 3572,
-      "subsystem": "Math",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "run",
@@ -29348,7 +31828,7 @@
     "SpellSecondaryUndeadShield": {
       "method_count": 5,
       "total_size": 1880,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "constructor",
@@ -29380,7 +31860,7 @@
     "SpellHolyShield": {
       "method_count": 5,
       "total_size": 1628,
-      "subsystem": "Math",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "run",
@@ -29572,7 +32052,7 @@
     "Fire": {
       "method_count": 5,
       "total_size": 1392,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_run",
@@ -29732,7 +32212,7 @@
     "SkulBoat": {
       "method_count": 5,
       "total_size": 1376,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "~destructor",
@@ -29764,7 +32244,7 @@
     "DiseaseTrail": {
       "method_count": 4,
       "total_size": 3172,
-      "subsystem": "Particles",
+      "subsystem": "Other",
       "methods": [
         {
           "name": "~destructor",
@@ -29791,7 +32271,7 @@
     "SpellHealing": {
       "method_count": 4,
       "total_size": 2164,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "~destructor",
@@ -29872,7 +32352,7 @@
     "SpellConeOfFire": {
       "method_count": 4,
       "total_size": 3936,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -29899,7 +32379,7 @@
     "SpellFireWeapons": {
       "method_count": 4,
       "total_size": 4524,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "~destructor",
@@ -30169,7 +32649,7 @@
     "SpellRoot": {
       "method_count": 4,
       "total_size": 1968,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -30250,7 +32730,7 @@
     "SpellHornOmenEffect": {
       "method_count": 4,
       "total_size": 2388,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "~destructor",
@@ -30304,7 +32784,7 @@
     "SpellHammerOfWrath": {
       "method_count": 4,
       "total_size": 456,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -30439,7 +32919,7 @@
     "SpellDiseaseTrail": {
       "method_count": 4,
       "total_size": 3464,
-      "subsystem": "Particles",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "~destructor",
@@ -30520,7 +33000,7 @@
     "SpellFireFlares": {
       "method_count": 4,
       "total_size": 1968,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "~destructor",
@@ -30574,7 +33054,7 @@
     "SpellColdWeapons": {
       "method_count": 4,
       "total_size": 2936,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -30655,7 +33135,7 @@
     "SpellConvertUndead": {
       "method_count": 4,
       "total_size": 1812,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -30682,7 +33162,7 @@
     "SkillBlunt": {
       "method_count": 4,
       "total_size": 240,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -30790,7 +33270,7 @@
     "SpellConeOfFrost": {
       "method_count": 4,
       "total_size": 2236,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -30844,7 +33324,7 @@
     "SkillResistPoison": {
       "method_count": 4,
       "total_size": 232,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getRankDescription",
@@ -30925,7 +33405,7 @@
     "SpellEntangle": {
       "method_count": 4,
       "total_size": 1968,
-      "subsystem": "Math",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "run",
@@ -30952,7 +33432,7 @@
     "SpellDiseaseShield": {
       "method_count": 4,
       "total_size": 3980,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "constructor",
@@ -31006,7 +33486,7 @@
     "SpellWizardBeam": {
       "method_count": 4,
       "total_size": 9180,
-      "subsystem": "Math",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "run",
@@ -31087,7 +33567,7 @@
     "SpellConvertEnemy": {
       "method_count": 4,
       "total_size": 1904,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "constructor",
@@ -31168,7 +33648,7 @@
     "SpellPlanarSteelEffect": {
       "method_count": 4,
       "total_size": 3360,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -31303,7 +33783,7 @@
     "BlindingLightEffect": {
       "method_count": 4,
       "total_size": 1532,
-      "subsystem": "Lighting",
+      "subsystem": "Other",
       "methods": [
         {
           "name": "msg_run",
@@ -31411,7 +33891,7 @@
     "SpellSummonSkeleton": {
       "method_count": 4,
       "total_size": 456,
-      "subsystem": "Math",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "run",
@@ -31438,7 +33918,7 @@
     "SpellClericRoot": {
       "method_count": 4,
       "total_size": 1968,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -31519,7 +33999,7 @@
     "SpellHateEffect": {
       "method_count": 4,
       "total_size": 1012,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -31654,7 +34134,7 @@
     "SkillSlashing": {
       "method_count": 4,
       "total_size": 240,
-      "subsystem": "Other",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "getSkillPointCost",
@@ -31708,7 +34188,7 @@
     "SpellMinorHealing": {
       "method_count": 4,
       "total_size": 804,
-      "subsystem": "Math",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "run",
@@ -31735,7 +34215,7 @@
     "SpellDiseaseEffect": {
       "method_count": 4,
       "total_size": 2536,
-      "subsystem": "Other",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "~destructor",
@@ -31762,7 +34242,7 @@
     "SpellBlindingLight": {
       "method_count": 4,
       "total_size": 804,
-      "subsystem": "Lighting",
+      "subsystem": "Spells",
       "methods": [
         {
           "name": "__typeinfo",
@@ -31987,7 +34467,7 @@
     "SkillPoisonWeapons": {
       "method_count": 3,
       "total_size": 152,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -32094,6 +34574,28 @@
         }
       ]
     },
+    "_Deque_base": {
+      "method_count": 3,
+      "total_size": 736,
+      "subsystem": "Other",
+      "methods": [
+        {
+          "name": "_M_create_nodes",
+          "addr": "0x1204988",
+          "size": 124
+        },
+        {
+          "name": "_M_destroy_nodes",
+          "addr": "0x1205288",
+          "size": 96
+        },
+        {
+          "name": "_M_initialize_map",
+          "addr": "0x1204258",
+          "size": 516
+        }
+      ]
+    },
     "RealmService::GameAttrsImp": {
       "method_count": 3,
       "total_size": 192,
@@ -32119,7 +34621,7 @@
     "SkillDiseaseEffect": {
       "method_count": 3,
       "total_size": 168,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -32207,7 +34709,7 @@
     "SkillBallOfHate": {
       "method_count": 3,
       "total_size": 156,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -32248,6 +34750,28 @@
         }
       ]
     },
+    "deque": {
+      "method_count": 3,
+      "total_size": 1072,
+      "subsystem": "Other",
+      "methods": [
+        {
+          "name": "_M_pop_front_aux",
+          "addr": "0x12046c0",
+          "size": 104
+        },
+        {
+          "name": "_M_reallocate_map",
+          "addr": "0x1204a08",
+          "size": 740
+        },
+        {
+          "name": "_M_push_back_aux",
+          "addr": "0x1204728",
+          "size": 228
+        }
+      ]
+    },
     "bad_typeid": {
       "method_count": 3,
       "total_size": 148,
@@ -32273,7 +34797,7 @@
     "SkillHateEffect": {
       "method_count": 3,
       "total_size": 156,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "constructor",
@@ -32339,7 +34863,7 @@
     "SkillHateBeam": {
       "method_count": 3,
       "total_size": 156,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "__typeinfo",
@@ -32383,7 +34907,7 @@
     "SkillDiseaseWeapons": {
       "method_count": 3,
       "total_size": 152,
-      "subsystem": "C++ Runtime",
+      "subsystem": "Skills",
       "methods": [
         {
           "name": "constructor",
@@ -32438,6 +34962,23 @@
           "name": "__as",
           "addr": "0x102fcf0",
           "size": 300
+        }
+      ]
+    },
+    "__default_alloc_template": {
+      "method_count": 2,
+      "total_size": 592,
+      "subsystem": "Other",
+      "methods": [
+        {
+          "name": "_S_refill",
+          "addr": "0x11f2d58",
+          "size": 148
+        },
+        {
+          "name": "_S_chunk_alloc",
+          "addr": "0x11f3318",
+          "size": 444
         }
       ]
     },
@@ -33233,6 +35774,18 @@
           "name": "~destructor",
           "addr": "0x1e5db0",
           "size": 44
+        }
+      ]
+    },
+    "__malloc_alloc_template": {
+      "method_count": 1,
+      "total_size": 148,
+      "subsystem": "Other",
+      "methods": [
+        {
+          "name": "_S_oom_malloc",
+          "addr": "0x11f2df0",
+          "size": 148
         }
       ]
     },
@@ -34307,44 +36860,56 @@
   },
   "subsystems": {
     "Other": {
-      "function_count": 7138,
-      "total_size": 2258328
-    },
-    "C++ Runtime": {
-      "function_count": 1091,
-      "total_size": 287012
-    },
-    "Math": {
-      "function_count": 413,
-      "total_size": 242492
-    },
-    "Renderer": {
-      "function_count": 431,
-      "total_size": 207356
+      "function_count": 6112,
+      "total_size": 1891760
     },
     "Game Entities": {
-      "function_count": 246,
-      "total_size": 203984
+      "function_count": 543,
+      "total_size": 444840
+    },
+    "C++ Runtime": {
+      "function_count": 696,
+      "total_size": 203304
     },
     "Networking": {
-      "function_count": 889,
-      "total_size": 196584
+      "function_count": 891,
+      "total_size": 197980
+    },
+    "Math": {
+      "function_count": 303,
+      "total_size": 176620
+    },
+    "Renderer": {
+      "function_count": 370,
+      "total_size": 160680
     },
     "Sony SDK": {
-      "function_count": 484,
-      "total_size": 98304
+      "function_count": 489,
+      "total_size": 100092
+    },
+    "Spells": {
+      "function_count": 159,
+      "total_size": 88876
+    },
+    "Game Props": {
+      "function_count": 261,
+      "total_size": 78140
     },
     "Physics": {
-      "function_count": 143,
-      "total_size": 64020
+      "function_count": 144,
+      "total_size": 64404
     },
     "Engine (VIESFParse)": {
       "function_count": 117,
       "total_size": 56912
     },
-    "Particles": {
-      "function_count": 194,
-      "total_size": 45264
+    "Skills": {
+      "function_count": 482,
+      "total_size": 54700
+    },
+    "Projectiles": {
+      "function_count": 87,
+      "total_size": 52192
     },
     "Scene": {
       "function_count": 140,
@@ -34358,21 +36923,25 @@
       "function_count": 146,
       "total_size": 41012
     },
-    "Lighting": {
-      "function_count": 135,
-      "total_size": 33296
-    },
     "UI": {
       "function_count": 97,
       "total_size": 29496
+    },
+    "AMX Scripting": {
+      "function_count": 144,
+      "total_size": 26232
     },
     "Engine (VIRealmInterface)": {
       "function_count": 34,
       "total_size": 25980
     },
-    "AMX Scripting": {
-      "function_count": 142,
-      "total_size": 25836
+    "Particles": {
+      "function_count": 135,
+      "total_size": 24932
+    },
+    "Engine (VIPool)": {
+      "function_count": 145,
+      "total_size": 24616
     },
     "Engine (VISpellEventDriver)": {
       "function_count": 34,
@@ -34390,21 +36959,29 @@
       "function_count": 39,
       "total_size": 21100
     },
+    "C++ Stdlib": {
+      "function_count": 233,
+      "total_size": 20684
+    },
     "Sprites": {
       "function_count": 76,
       "total_size": 19544
+    },
+    "Lighting": {
+      "function_count": 70,
+      "total_size": 19420
     },
     "Collision": {
       "function_count": 42,
       "total_size": 19408
     },
-    "DMA/GIF Pipeline": {
-      "function_count": 107,
-      "total_size": 19356
-    },
     "Zone": {
       "function_count": 63,
       "total_size": 19204
+    },
+    "DMA/GIF Pipeline": {
+      "function_count": 103,
+      "total_size": 18960
     },
     "World": {
       "function_count": 39,
@@ -34414,13 +36991,13 @@
       "function_count": 30,
       "total_size": 15576
     },
-    "C++ Stdlib": {
-      "function_count": 223,
-      "total_size": 15376
-    },
     "Engine (VIEffectVolume)": {
       "function_count": 26,
       "total_size": 15108
+    },
+    "Engine (VIMap)": {
+      "function_count": 47,
+      "total_size": 15000
     },
     "Engine (VIUIWindow)": {
       "function_count": 33,
@@ -34438,6 +37015,10 @@
       "function_count": 31,
       "total_size": 12640
     },
+    "Engine (VIMultiMap)": {
+      "function_count": 37,
+      "total_size": 11864
+    },
     "Engine (VISoundDevice)": {
       "function_count": 59,
       "total_size": 10504
@@ -34445,6 +37026,10 @@
     "Engine (VIWndOptions)": {
       "function_count": 20,
       "total_size": 9816
+    },
+    "Engine (VIArray)": {
+      "function_count": 101,
+      "total_size": 8900
     },
     "Engine (VIWalkCamera)": {
       "function_count": 21,
@@ -34490,6 +37075,10 @@
       "function_count": 15,
       "total_size": 5508
     },
+    "Engine (VIList)": {
+      "function_count": 48,
+      "total_size": 5028
+    },
     "Engine (VIGUIPage)": {
       "function_count": 27,
       "total_size": 4924
@@ -34522,6 +37111,10 @@
       "function_count": 16,
       "total_size": 4448
     },
+    "Engine (VIVector)": {
+      "function_count": 25,
+      "total_size": 4348
+    },
     "Engine (VIStation)": {
       "function_count": 14,
       "total_size": 4284
@@ -34533,6 +37126,10 @@
     "Engine (VIFlyCamera)": {
       "function_count": 13,
       "total_size": 3740
+    },
+    "Engine (VISet)": {
+      "function_count": 11,
+      "total_size": 3636
     },
     "Engine (VIWndDnas)": {
       "function_count": 13,

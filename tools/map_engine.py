@@ -10,6 +10,7 @@ Usage:
     python3 tools/map_engine.py --input /tmp/readelf_output.txt
 """
 
+import argparse
 import re
 import sys
 import json
@@ -57,15 +58,21 @@ def demangle_old_style(name: str) -> tuple[str | None, str]:
     m = re.match(r'_\$_(\d+)(\w+)', name)
     if m:
         length = int(m.group(1))
-        cls = m.group(2)[:length]
-        return cls, "~destructor"
+        rest = m.group(2)
+        if length <= len(rest):
+            cls = rest[:length]
+            return cls, "~destructor"
+        # fall through if malformed
 
     # Constructor: __<len><ClassName><Args>
     m = re.match(r'^__(\d+)(\w+)', name)
     if m:
         length = int(m.group(1))
-        cls = m.group(2)[:length]
-        return cls, "constructor"
+        rest = m.group(2)
+        if length <= len(rest):
+            cls = rest[:length]
+            return cls, "constructor"
+        # fall through if malformed
 
     # Method: method__<len><ClassName><Args>
     m = re.match(r'^(\w+?)__(\d+)(\w+)', name)
@@ -88,13 +95,37 @@ def demangle_old_style(name: str) -> tuple[str | None, str]:
         pos = 0
         for _ in range(nesting):
             lm = re.match(r'(\d+)', rest[pos:])
-            if lm:
-                l = int(lm.group(1))
-                pos += len(lm.group(1))
-                classes.append(rest[pos:pos+l])
-                pos += l
+            if not lm:
+                classes = []  # malformed — discard partial result
+                break
+            clen = int(lm.group(1))
+            pos += len(lm.group(1))
+            if pos + clen > len(rest):
+                classes = []  # length overrun — discard
+                break
+            classes.append(rest[pos:pos+clen])
+            pos += clen
         if classes:
             return "::".join(classes), method
+
+    # Method on template class: method__t<len><ClassName><TemplateArgs>
+    m = re.match(r'^(\w+?)__t(\d+)(\w+)', name)
+    if m:
+        method = m.group(1)
+        length = int(m.group(2))
+        rest = m.group(3)
+        if length <= len(rest):
+            cls = rest[:length]
+            return cls, method
+
+    # Template constructor: __t<len><ClassName><TemplateArgs>
+    m = re.match(r'^__t(\d+)(\w+)', name)
+    if m:
+        length = int(m.group(1))
+        rest = m.group(2)
+        if length <= len(rest):
+            cls = rest[:length]
+            return cls, "constructor"
 
     # Free function: method__F<Args>
     m = re.match(r'^(\w+?)__F', name)
@@ -106,6 +137,11 @@ def demangle_old_style(name: str) -> tuple[str | None, str]:
         return None, name
 
     return None, name
+
+
+def _kw(word: str, text: str) -> bool:
+    """Word-boundary keyword match to avoid false positives."""
+    return bool(re.search(rf'(?:^|[^a-z]){word}', text, re.IGNORECASE))
 
 
 def classify_subsystem(cls: str | None, method: str, name: str) -> str:
@@ -153,11 +189,11 @@ def classify_subsystem(cls: str | None, method: str, name: str) -> str:
         return "Camera"
 
     # Rendering
-    if any(x in n for x in ("draw", "render", "blit", "raster")):
+    if any(x in n for x in ("render", "blit", "raster")) or _kw("draw", name):
         return "Renderer"
-    if any(x in n for x in ("particle", "trail", "lightning", "fractal")):
+    if any(x in n for x in ("particle", "lightning", "fractal")) or _kw("trail", name):
         return "Particles"
-    if any(x in n for x in ("light", "shadow", "illumin")):
+    if "illumin" in n or _kw("light", name) or _kw("shadow", name):
         return "Lighting"
 
     # DMA/GIF/VIF pipeline
@@ -183,10 +219,46 @@ def classify_subsystem(cls: str | None, method: str, name: str) -> str:
     if c == "vehicle":
         return "Physics"
 
-    # Entity/Game
+    # Entity/Game — monsters, NPCs, items, props
     if c in ("creature", "orc", "goblin", "skeleton", "mummy", "soul",
-             "player", "npc", "item", "base"):
+             "player", "npc", "item", "base", "critter",
+             "woodelfsoldier", "cyclops", "spiderqueen", "antqueen",
+             "blackwidow", "vampirelord", "demon", "ghoul", "scorpion",
+             "wraith", "cloudgiant", "innoruuk", "superorc",
+             "mummyking", "undeadknight", "undeadknightclone",
+             "froglock", "seamonster", "arenabeast", "ant", "lavamonster",
+             "cthulu", "nightmare", "firebeetle", "firefly", "mermaid",
+             "gnome", "gnomenavigator", "maledarkelfelfsoldier",
+             "maledarkelf", "femaledarkelfsoldier", "femaledarkelf",
+             "cat", "shooter", "rondo"):
         return "Game Entities"
+
+    # Skills (Skill* classes)
+    if c.startswith("skill"):
+        return "Skills"
+
+    # Spells (Spell* classes, not VISpell which is engine)
+    if c.startswith("spell") and not c.startswith("vispell"):
+        return "Spells"
+
+    # Game objects/props
+    if c in ("gameobject", "container", "chest", "autochest", "autochestlp",
+             "savepoint", "doorswing", "doorsecret", "lever", "floorswitch",
+             "trigger", "pushtrigger", "generator", "jumpgate", "teleporter",
+             "autoprop", "autoproplp", "autopropphysics", "cosmeticprop",
+             "cosmeticpropanim", "userparamprop", "pushphysicsprop",
+             "particleprop", "weaponrack", "boat", "skulboat", "wheel",
+             "clock", "candle", "candle2", "gold", "fire", "loosefire",
+             "trap", "missiletrap", "webtrap"):
+        return "Game Props"
+
+    # Projectiles/effects
+    if c in ("missileweapon", "animatedmissile", "playerprojectile",
+             "beetleprojectile", "shockprojectile", "coldarrowprojectile",
+             "hateprojectile", "holybolt", "diseasebolt",
+             "iceball", "lavabomb", "waterSpout", "web",
+             "sparks", "gutchunk", "flyingtext", "dustcloud"):
+        return "Projectiles"
 
     # Sony SDK
     if n.startswith("sce") or n.startswith("_sce"):
@@ -207,9 +279,16 @@ def classify_subsystem(cls: str | None, method: str, name: str) -> str:
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Map Snowblind Engine structure from ELF symbol table")
+    parser.add_argument("--input", type=str, help="Path to readelf -sW output file (default: read from stdin)")
+    parser.add_argument("--json", action="store_true", help="Output JSON instead of formatted report")
+    parser.add_argument("--title", type=str, default="Champions of Norrath (SLUS-20565)",
+                        help="Game title for report header")
+    args = parser.parse_args()
+
     # Read from stdin or file
-    if len(sys.argv) > 2 and sys.argv[1] == "--input":
-        lines = Path(sys.argv[2]).read_text().splitlines()
+    if args.input:
+        lines = Path(args.input).read_text().splitlines()
     else:
         lines = sys.stdin.readlines()
 
@@ -245,12 +324,7 @@ def main():
 
         subsystems[subsystem].append(entry)
 
-    # Output mode
-    mode = "report"
-    if "--json" in sys.argv:
-        mode = "json"
-
-    if mode == "json":
+    if args.json:
         output = {
             "total_functions": len(functions),
             "total_classes": len(classes),
@@ -276,7 +350,7 @@ def main():
         # Pretty report
         print("=" * 70)
         print(f"  SNOWBLIND ENGINE STRUCTURE MAP")
-        print(f"  Champions of Norrath (SLUS-20565)")
+        print(f"  {args.title}")
         print(f"  {len(functions)} functions, {len(classes)} classes")
         print("=" * 70)
 
