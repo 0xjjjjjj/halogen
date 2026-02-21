@@ -1,6 +1,6 @@
-# Phase 2 Status — Static Analysis Complete
+# Phase 2 Status — Ghidra Batch Decompilation Complete
 
-As of 2026-02-21. All analysis from PS2Recomp C++ output is exhausted. Demon Stone prototype provides full struct layouts. Next steps require runtime tools (Ghidra, PCSX2) or implementation work.
+As of 2026-02-21. All 6,446 functions batch-decompiled via Ghidra headless mode (tools/ghidra-batch-decompile.py). 42 rendering functions manually analyzed in docs/render-pipeline.md (1,492 lines). Full decompiled output in output/decompiled/ (30MB, 6,447 .c files).
 
 ## What We Know
 
@@ -105,18 +105,11 @@ The "VU1 microcode gap" from Phase 1 was based on `.vudata`/`.vubss` being zeroe
 
 ### Tier 1: High value, do next
 
-#### 1. Ghidra Session
-**Why**: PS2Recomp missed some functions (e.g., VIScene::Render at 0x0113bb48). Ghidra can decompile these. Now enhanced with Demon Stone struct layouts for type annotation.
+#### 1. Ghidra Session — COMPLETE
+6,446/6,447 functions batch-decompiled via headless mode. 42 rendering functions manually analyzed with full pseudocode, struct layouts, and call graphs in `docs/render-pipeline.md` (1,492 lines). VU1 data memory map, scratchpad map, bottleneck cost formula all documented.
 
-**Concrete steps**:
-- Load SLUS-20565 ELF into Ghidra with EE-Reloaded extension (already on sleeper5)
-- Enable "Use Deprecated Demangler" in Tool Options → Analyzers → Demangler GNU
-- Cross-reference our 4,701-symbol map against Ghidra's analysis
-- Import Demon Stone struct layouts (Cl* → VI* mapping) as Ghidra data types
-- Decompile VIScene::Render (912 bytes) — the main rendering orchestrator
-- Note: .mdebug is empty, so no auto struct recovery — use Demon Stone layouts instead
-
-**Effort**: 2-3 hours setup + ongoing exploration
+**Output**: `output/decompiled/` (6,447 .c files, 30MB) + `output/decompiled/all_decompiled.txt` (12MB combined)
+**Tools**: `tools/ghidra-batch-decompile.py`, `tools/run-batch-decompile.bat`
 
 #### 2. Cl* → VI* Type Mapping Script
 **Why**: We have 1,211 struct layouts from Demon Stone and 4,701 function names from CoN. Matching them automates type annotation.
