@@ -8,12 +8,15 @@ Reverse engineer the Snowblind Engine (PS2) to enable native ports and optimizat
 
 **Phase 2: Engine Understanding — static analysis complete, need runtime analysis.**
 
-Phase 1 done. Phase 2 static analysis done (2026-02-20). ELF acquired, PS2Recomp run (9,395 C++ files), complete engine architecture mapped from symbol table + recomp output. Every major subsystem traced via ast-grep call graph extraction.
+Phase 1 done. Phase 2 static analysis done (2026-02-21). ELF acquired, PS2Recomp run (9,395 C++ files), complete engine architecture mapped from symbol table + recomp output. Every major subsystem traced via ast-grep call graph extraction. Demon Stone prototype provides full struct layouts with byte offsets (1,211 types, 7,595 members).
 
 ### What's done
-- ELF extracted and analyzed (SLUS-20565, 5.6MB, debug symbols confirmed via .mdebug)
+- ELF extracted and analyzed (SLUS-20565, 5.6MB, .mdebug confirmed empty across all builds)
 - PS2Recomp recompilation: 9,395 C++ files generated
 - ELF symbol table mapped: 4,701 functions classified by subsystem
+- Demon Stone prototype: 9.3MB Metrowerks DWARF1 debug info → 1,211 struct layouts recovered
+- Cl* (Stormfront) → VI* (Snowblind) class mapping established (same engine, different naming)
+- VU1 microcode found in DVP overlay sections (16 overlays, 2 programs: RasterMicro, BillboardMicro)
 - Complete engine architecture documented (17 subsystems, 1,262 lines)
 - VIRaster rendering pipeline: call graph, 5 vertex formats, material LRU, DMA double buffering
 - VIZone: BSP traversal, pre-translation, collision integration
@@ -33,15 +36,19 @@ Phase 1 done. Phase 2 static analysis done (2026-02-20). ELF acquired, PS2Recomp
 - UI system (VIWnd: 14+ window types, retained-mode widget tree)
 - Networking (344 files, custom DRDP protocol, peer-to-peer)
 - Slavedriver Engine source comparison (docs/slavedriver-comparison.md)
+- Demon Stone prototype analysis: source tree, class members, struct layouts (docs/demon-stone-*.md/json)
+- Python DWARF1 type parser (tools/parse-dwarf1-types.py)
 - Scuffed ETL pipeline for video analysis (configs/scuffed-re-profile.yaml)
 - ast-grep call graph extraction tool (tools/extract-callgraph.sh)
+- Ghidra 11.4.2 + ghidra-emotionengine-reloaded v2.1.33 set up on sleeper5
 
 ### What's next
 See docs/phase2-status.md for concrete next steps. Summary:
-1. **Ghidra session** — load ELF, decompile functions PS2Recomp missed (VIScene::Render)
-2. **PCSX2 runtime tracing** — trace VU1 uploads, DMA packets, GS register writes
-3. **VU1 microcode extraction** — only when needed for interpreter layer
-4. **paraLLEl-GS evaluation** — test with captured GS command streams
+1. **Ghidra session** — load ELF, import Demon Stone struct layouts, decompile VIScene::Render
+2. **Cl* → VI* type mapping** — script to match Demon Stone structs to CoN symbols
+3. **PCSX2 runtime tracing** — trace VU1 uploads, DMA packets, GS register writes
+4. **VU1 microcode extraction** — DVP overlay sections, defer until interpreter layer
+5. **paraLLEl-GS evaluation** — test with captured GS command streams
 
 ## Key Research Findings (Phase 1)
 
@@ -51,11 +58,13 @@ See docs/phase2-status.md for concrete next steps. Summary:
 - We integrate this as the rendering backend instead of writing a GPU driver
 - This was the biggest risk; it's now a paper tiger
 
-### Debug symbols may exist in retail ELF
-- ghidra-emotionengine-reloaded recovers `.mdebug` section data
-- Many early PS2 games retained debug symbols in retail builds
-- If CoN has them: function names for free, weeks of manual RE avoided
-- **First thing to check when binary is acquired**
+### Debug symbols — .mdebug empty, Demon Stone has DWARF1 instead
+- `.mdebug.eabi64` is 0 bytes in ALL Snowblind builds (retail, demo, prototype) — toolchain decision
+- Demon Stone prototype (Stormfront Studios, same engine) has 9.3MB of Metrowerks DWARF1 in `.debug`
+- Recovered 1,211 struct layouts, 7,595 members, 129 enums — the complete engine type system
+- Cl* prefix (Stormfront) = VI* prefix (Snowblind), direct mapping established
+- Engine internal codename: "Phoenix", animation system: "Noam"
+- Parser: `tools/parse-dwarf1-types.py`, output: `docs/demon-stone-types.json`
 
 ### Cave performance bottleneck — SOLVED
 - Each torch = VIParticleSprite (billboard particles) + VIPointLight (VIColorBuffer per-vertex overlay)
@@ -65,12 +74,13 @@ See docs/phase2-status.md for concrete next steps. Summary:
 - PCSX2's "Fast Texture Invalidation" partially helps by reducing VIColorBuffer invalidation overhead
 - Native port fix: replace VIPointLight/VIColorBuffer with modern per-pixel lighting
 
-### VU1 microcode gap (mitigated, defer until needed)
+### VU1 microcode — found in DVP overlays (defer until needed)
 - PS2Recomp can't handle VU1 programs (geometry processing)
-- No VU1 disassembler exists anywhere
-- At least 2 VU1 programs confirmed: RasterMicro (general geometry) and BillboardMicro (billboards)
+- `.vudata`/`.vubss` are zeroed, but actual VU1 code lives in `.DVP.overlay.*` ELF sections
+- Retail CoN: 16 DVP overlays (2 VU1 programs), demo/prototype: 8 overlays (1 program)
+- 2 programs confirmed: RasterMicro (general geometry) and BillboardMicro (billboards)
 - Upload boundary fully traced: UploadRasterMicro, UploadBillboardMicro, UploadMatrices, UploadPreTrans
-- Mitigation: extract `.vudata` section, build VU1 interpreter layer
+- Mitigation: extract DVP overlay sections, build VU1 interpreter layer
 - Don't dig in until actively building the interpreter — need runtime tracing first
 
 ### Self-modifying code (mitigated)
@@ -95,7 +105,7 @@ Also called the "Dark Alliance engine." Created by Ezra Dreisbach. Zero public t
 | Tool | Purpose | Status |
 |------|---------|--------|
 | PS2Recomp | MIPS R5900 → C++ static recompilation | Done — 9,395 files generated |
-| Ghidra + ghidra-emotionengine-reloaded | Manual RE, symbol recovery, .mdebug parsing | Ready — next step |
+| Ghidra + ghidra-emotionengine-reloaded | Manual RE, decompilation | Ready on sleeper5 (Ghidra 11.4.2, EE-Reloaded v2.1.33) |
 | paraLLEl-GS | Vulkan GS emulator (rendering backend) | Phase 3 integration |
 | PCSX2 debugger | Runtime analysis, pointer tracking | Available |
 | ast-grep | C++ AST-based call graph extraction | Working — tools/extract-callgraph.sh |
@@ -119,12 +129,16 @@ halogen/
 │   ├── subsystem-analysis.md          # Deep subsystem analysis (1,262 lines)
 │   ├── viraster-call-graph.md         # VIRaster rendering pipeline
 │   ├── phase2-status.md               # Current status + next steps
+│   ├── demon-stone-source-map.md      # Demon Stone source tree + class mapping
+│   ├── demon-stone-class-members.md   # Class members from symbol mangling
+│   ├── demon-stone-types.json         # Struct layouts with byte offsets (1,211 types)
 │   └── TOOLCHAIN.md                   # Environment setup guide
 ├── configs/
 │   ├── champions-of-norrath.toml      # PS2Recomp config
 │   └── scuffed-re-profile.yaml        # Video analysis ETL config
 ├── tools/
-│   └── extract-callgraph.sh           # ast-grep call graph extraction
+│   ├── extract-callgraph.sh           # ast-grep call graph extraction
+│   └── parse-dwarf1-types.py          # DWARF1 struct layout parser (Python)
 ├── output/
 │   ├── champions-of-norrath/          # PS2Recomp C++ output (9,395 files)
 │   ├── ps2-gpu-graphics-synthesizer.{md,json}  # Scuffed: GS hardware analysis
@@ -146,7 +160,9 @@ halogen/
 - ~~Reverse the asset pipeline~~ done (ESF/CSF format, 117 parse methods, VILoader async I/O)
 - ~~Identify the scripting/gameplay layer~~ done (AMX/Pawn VM with JIT, createByName factory)
 - ~~Document engine architecture~~ done (1,262 lines, 17 subsystems, 17 insights)
-- Build VU1 interpreter for geometry processing — **NEXT** (needs runtime tracing)
+- ~~Recover struct layouts~~ done (Demon Stone prototype: 1,211 types, 7,595 members)
+- ~~Locate VU1 microcode~~ done (DVP overlay sections, 2 programs confirmed)
+- Ghidra decompilation + Demon Stone type import — **NEXT**
 - Runtime validation via PCSX2 — **NEXT**
 
 ### Phase 3: Native Port

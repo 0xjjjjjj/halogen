@@ -1,6 +1,6 @@
 # Phase 2 Status — Static Analysis Complete
 
-As of 2026-02-20. All analysis from PS2Recomp C++ output is exhausted. Next steps require runtime tools (Ghidra, PCSX2) or implementation work.
+As of 2026-02-21. All analysis from PS2Recomp C++ output is exhausted. Demon Stone prototype provides full struct layouts. Next steps require runtime tools (Ghidra, PCSX2) or implementation work.
 
 ## What We Know
 
@@ -54,23 +54,81 @@ Fix: Replace VIPointLight/VIColorBuffer with per-pixel lighting (trivial on mode
 
 **Strategy**: Replace engine layer (VI*), keep game layer intact.
 
+### Demon Stone Prototype — The Rosetta Stone (2026-02-21)
+
+The Demon Stone Jun 2004 prototype (Stormfront Studios, `SLUS_208.04`, 14.7MB) has 9.3MB of Metrowerks CodeWarrior DWARF1 debug info. This is the same Snowblind Engine with a different studio's naming conventions (`Cl*` prefix = Snowblind's `VI*` prefix).
+
+**What we recovered**:
+- 1,211 unique struct/class/union definitions with full member layouts (byte offsets, types, sizes)
+- 7,595 total member fields across all structs
+- 129 enums with 1,344 named constants
+- 618 source file paths revealing complete engine source tree at `C:\Projects\Phoenix\Game\`
+- 655 classes with 6,041 member names from C++ name mangling
+- Engine internal codename: "Phoenix". Animation system codename: "Noam"
+
+**Key class mapping** (Demon Stone `Cl*` → CoN `VI*`):
+
+| Demon Stone | Champions of Norrath | Size | Members |
+|-------------|---------------------|------|---------|
+| ClGfx | VIRaster | varies | rendering pipeline |
+| ClWorld | VIZone | varies | world/BSP management |
+| ClNoamActor | VIHSprite | 2,624 bytes | 64 members + 2 bases |
+| ClDynamicLightManager | VIColorBuffer | — | per-vertex lighting |
+| ClPfxSystem | VIParticle | varies | particle effects |
+| ClScript | AMX/Pawn VM | varies | scripting engine |
+| ClAudio | VISoundDevice | — | audio system |
+| ClCharacterObj | game entity base | 1,568 bytes | 126 members |
+| ClCamera | camera system | 1,984 bytes | 23 members |
+| ClShaderPass | shader/material | 40 bytes | 12 members |
+| ClActor | actor base | 160 bytes | 6 members |
+
+**Parser tool**: `tools/parse-dwarf1-types.py` — 250-line Python DWARF1 parser. Outputs JSON.
+**Output**: `docs/demon-stone-types.json` (deduplicated, 1,211 structs)
+
+### .mdebug Status — Confirmed Empty Across All Builds
+
+Checked 3 Snowblind-built ELFs — `.mdebug.eabi64` is 0 bytes in ALL of them:
+- Retail CoN (`SLUS_205.65`) — 0 bytes
+- CoN demo disc (`CORE_DEMO.ELF`) — 0 bytes
+- CoN Aug 2003 prototype (`SLPS_251.39`) — 0 bytes, no `.symtab` either
+
+This was a toolchain/Makefile decision, not per-build stripping. Snowblind's build pipeline zeroed `.mdebug` unconditionally.
+
+### VU1 Microcode — Found in DVP Overlay Sections
+
+The "VU1 microcode gap" from Phase 1 was based on `.vudata`/`.vubss` being zeroed. The actual VU1 programs live in **DVP overlay sections** (`.DVP.overlay.*`):
+- Retail CoN: 16 DVP overlays (2 VU1 programs)
+- Demo/prototype: 8 DVP overlays (1 VU1 program)
+- The 2 programs match our earlier analysis: RasterMicro (general geometry) and BillboardMicro (billboards)
+
 ## What's Left — Ranked by Value
 
 ### Tier 1: High value, do next
 
 #### 1. Ghidra Session
-**Why**: PS2Recomp missed some functions (e.g., VIScene::Render at 0x0113bb48). Ghidra + ghidra-emotionengine-reloaded can decompile these AND leverage .mdebug debug symbols for struct layouts and local variable names.
+**Why**: PS2Recomp missed some functions (e.g., VIScene::Render at 0x0113bb48). Ghidra can decompile these. Now enhanced with Demon Stone struct layouts for type annotation.
 
 **Concrete steps**:
-- Load SLUS-20565 ELF into Ghidra with EE-Reloaded extension
-- Auto-analyze with .mdebug symbol recovery
+- Load SLUS-20565 ELF into Ghidra with EE-Reloaded extension (already on sleeper5)
+- Enable "Use Deprecated Demangler" in Tool Options → Analyzers → Demangler GNU
 - Cross-reference our 4,701-symbol map against Ghidra's analysis
+- Import Demon Stone struct layouts (Cl* → VI* mapping) as Ghidra data types
 - Decompile VIScene::Render (912 bytes) — the main rendering orchestrator
-- Export struct definitions for VI* classes
+- Note: .mdebug is empty, so no auto struct recovery — use Demon Stone layouts instead
 
 **Effort**: 2-3 hours setup + ongoing exploration
 
-#### 2. PCSX2 Runtime Tracing
+#### 2. Cl* → VI* Type Mapping Script
+**Why**: We have 1,211 struct layouts from Demon Stone and 4,701 function names from CoN. Matching them automates type annotation.
+
+**Concrete steps**:
+- Write a script to map Demon Stone `Cl*` class names to CoN `VI*` equivalents
+- Match function parameters/return types to CoN function signatures
+- Generate Ghidra type import scripts (.gdt or .h files)
+
+**Effort**: Half day
+
+#### 3. PCSX2 Runtime Tracing
 **Why**: VU1 microcode and GS register writes are invisible to static analysis. Need to see what actually happens at runtime.
 
 **Concrete steps**:
@@ -84,19 +142,19 @@ Fix: Replace VIPointLight/VIColorBuffer with per-pixel lighting (trivial on mode
 
 ### Tier 2: Medium value, do when needed
 
-#### 3. VU1 Microcode Extraction
-**Why**: Need to build a VU1 interpreter for the native port. But only matters when we're actually implementing the interpreter layer.
+#### 4. VU1 Microcode Extraction
+**Why**: Need to build a VU1 interpreter for the native port. Programs now confirmed in DVP overlay sections.
 
 **Concrete steps**:
-- Extract .vudata section from ELF: `readelf -x .vudata SLUS-20565.ELF`
+- Extract DVP overlay sections from ELF (16 overlays, 2 VU1 programs: RasterMicro, BillboardMicro)
 - Write a VU1 disassembler (VU1 instruction set is documented in ps2tek)
 - OR: capture VU1 uploads via PCSX2 VIF tracing (more complete — catches runtime-loaded programs)
 - Catalogue all unique VU1 programs and their vertex format signatures
 
-**Depends on**: PCSX2 runtime tracing (#2)
+**Depends on**: PCSX2 runtime tracing (#3)
 **Effort**: Days to weeks (VU1 instruction set is complex)
 
-#### 4. paraLLEl-GS Evaluation
+#### 5. paraLLEl-GS Evaluation
 **Why**: Need to verify paraLLEl-GS can actually consume the GS command stream Champions of Norrath generates.
 
 **Concrete steps**:
@@ -105,12 +163,12 @@ Fix: Replace VIPointLight/VIColorBuffer with per-pixel lighting (trivial on mode
 - Check rendering accuracy vs PCSX2 software renderer
 - Identify any unsupported GS features
 
-**Depends on**: PCSX2 GS dump capture (#2)
+**Depends on**: PCSX2 GS dump capture (#3)
 **Effort**: Half day build + test
 
 ### Tier 3: Low value until implementation
 
-#### 5. AMX/Pawn Script Extraction
+#### 6. AMX/Pawn Script Extraction
 **Why**: Need to understand what scripts do and whether JIT recompilation is needed.
 
 **Concrete steps**:
@@ -120,7 +178,7 @@ Fix: Replace VIPointLight/VIColorBuffer with per-pixel lighting (trivial on mode
 
 **Effort**: Hours to find scripts, then standard Pawn tooling
 
-#### 6. ESF File Format Reversing
+#### 7. ESF File Format Reversing
 **Why**: Need to read/write ESF files for modding and to understand asset structure.
 
 **Concrete steps**:
@@ -153,4 +211,7 @@ Fix: Replace VIPointLight/VIColorBuffer with per-pixel lighting (trivial on mode
 | `docs/slavedriver-comparison.md` | Slavedriver→Snowblind evolution mapping |
 | `docs/elf-analysis-2026-02-20.md` | ELF binary analysis results |
 | `docs/research-2026-02-20.md` | Phase 1 research + risk pre-mortem |
+| `docs/demon-stone-source-map.md` | Demon Stone source tree, class mapping (618 files, 655 classes) |
+| `docs/demon-stone-class-members.md` | All class members from symbol mangling (6,041 members) |
+| `docs/demon-stone-types.json` | Deduplicated struct layouts with byte offsets (1,211 types) |
 | `docs/TOOLCHAIN.md` | Environment setup guide |
