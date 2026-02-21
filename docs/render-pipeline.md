@@ -529,6 +529,175 @@ Both levels use **back-to-front** (painter's algorithm): visit the far side of t
 
 ---
 
+## VIHSprite::Raster (0x1060548, 632 bytes)
+
+Character bone animation renderer. Doesn't draw geometry directly — coordinates bone transforms and dispatches body parts through RasterSprite.
+
+```
+Raster(sprite, camera, scene, raster, renderMode)
+├── CalcLODLevelIndex(sprite, modelview)       ← LOD selection
+├── Process(sprite, lodLevel, scene)           ← update animation
+├── CalcTransAboutCenter(sprite, modelview, scene, centerMatrix)
+├── SetBlendMatrices(sprite, raster)           ← upload bone matrices
+│
+└── for each attachment in VIPool<VIHSpriteAttachment> (sprite+0x60):
+    ├── spriteIndex = attachment[0x00]
+    ├── boneIndex   = attachment[0x04]
+    │
+    ├── boneIndex == -1 → SetModelView(centerMatrix), RasterSprite(spriteIndex)
+    └── boneIndex != -1 → Mul(boneMatrix[bone*0x100+0x30]),
+                           SetModelView(boneMatrix), RasterSprite(spriteIndex)
+```
+
+Each bone is 0x100 bytes (256 bytes), transform matrix at +0x30 within bone data. Body parts (head, torso, arms, legs, weapon, shield) are separate sprites attached to bones.
+
+---
+
+## CalcOutdoorsIntensity (0x1143940, 408 bytes)
+
+Vertical ground-probe ray cast to detect indoor/outdoor status for lighting transitions.
+
+```
+CalcOutdoorsIntensity(scene, camera)
+├── Ray: camera.pos → camera.pos with y-15  (15 units straight down)
+├── Filter: VISceneOutdoorsFilter
+├── Pick(scene, ray, filter)
+└── if hit:
+    ├── First time: scene[0x1AC0] = hitColor.alpha (outdoor intensity)
+    └── Subsequent: smooth transition at 0.2/sec max rate
+        delta = clamp(newAlpha - currentAlpha, ±timeDelta*0.0002)
+```
+
+Rate-limited to prevent jarring indoor↔outdoor lighting pops (~5 sec full transition).
+
+---
+
+## SetupTimeOfDay (0x1145948, 92 bytes)
+
+Dispatcher for three Time-of-Day subsystems:
+
+```
+SetupTimeOfDay(scene, camera, terrainBlend, envFlags)
+├── SetupTimeOfDayLights(scene, camera, terrainBlend)
+├── SetupTimeOfDayFog(scene, terrainBlend, envFlags)
+└── SetupTimeOfDaySky(scene, terrainBlend)
+```
+
+---
+
+## Lighting System
+
+### VIPointLight::Raster (0x10c3aa8, 256 bytes)
+
+Renders the light's visual glow sprite — NOT the per-vertex lighting computation.
+
+```
+Raster(light, camera, scene, raster, flags)
+├── sprite = GetLightUISprite(scene)
+├── if (sprite == -1) return        ← no visual representation
+├── Copy current model-view matrix
+├── ClampScale(light, matrix)       ← scale to light radius
+├── SetModelView(raster, matrix)
+└── RasterUISprite(scene, camera, sprite, flags)  ← draw glow billboard
+```
+
+### VIColorBuffer::Lock / Color / Unlock — The Per-Vertex DMA Engine
+
+The actual cave bottleneck. VIColorBuffer builds PS2 DMA packets that upload per-vertex colors to the GS via VIF→VU1→GIF.
+
+#### Lock (0x10c0728, 152 bytes)
+
+```
+Lock(colorbuffer, raster)
+├── Set locked = 1
+├── pBuildSource = PrimBuffer(raster, format)
+├── Calculate initial DMA tag position
+└── Reset all build counters
+```
+
+#### Color (0x10bffa8, 1,220 bytes) — Called once per vertex
+
+```
+Color(colorbuffer, rgba)
+├── BATCH MANAGEMENT:
+│   Track mesh batches (M) and primitive groups (P)
+│   Advance through source geometry vertex layout
+│
+├── DMA PACKET CONSTRUCTION:
+│   ├── 0x30 = VIF DIRECT (send to GS)
+│   ├── GIFtag: PACKED mode, RGBAQ register
+│   ├── VIF MSCAL (kick VU1 microcode)
+│   └── VIF end marker (0x60)
+│
+├── COLOR WRITE:
+│   output[0] = R >> 1    ← game: 0-255, GS: 0-128
+│   output[1] = G >> 1
+│   output[2] = B >> 1
+│   output[3] = A >> 1
+│
+└── PRIMITIVE COMPLETION (when group finishes):
+    ├── Write RStrip2Offset (triangle strip kick)
+    ├── Write VIF MSCAL (execute VU1 program)
+    └── Pad to 16-byte alignment
+```
+
+**Critical**: Build state variables (`_13VIColorBuffer$Build*`) are **static/global**. Only one VIColorBuffer can build at a time — sequential lock-per-light is mandatory.
+
+#### Unlock (0x10c07c0, 100 bytes)
+
+```
+Unlock(colorbuffer)
+├── Set locked = 0
+└── Zero all static build variables
+```
+
+### VIRaster::SetStaticLighting (0x11141a0, 48 bytes)
+
+Writes lighting color to PS2 scratchpad RAM (single-cycle access):
+
+```
+SetStaticLighting(raster, color)
+└── Write 16 bytes (VIColor32F) to scratchpad 0x70000200
+```
+
+### VIRaster::EnableAllLights (0x1114170, 48 bytes)
+
+Controls 3 light slot enables in scratchpad:
+
+```
+EnableAllLights(raster, enable)
+├── scratchpad[0x220] = enable   (light slot 0)
+├── scratchpad[0x221] = enable   (light slot 1)
+├── scratchpad[0x222] = enable   (light slot 2)
+└── raster+0x45E0 = 1           (lights-changed flag)
+```
+
+### PS2 Scratchpad as VU1 Parameter Block
+
+The 16KB scratchpad (0x70000000-0x70003FFF) stores render state read by VU1 microcode:
+
+| Address | Size | Contents |
+|---------|------|----------|
+| 0x70000200 | 16 | Static lighting color (VIColor32F) |
+| 0x70000220 | 1 | Light slot 0 enable |
+| 0x70000221 | 1 | Light slot 1 enable |
+| 0x70000222 | 1 | Light slot 2 enable |
+
+---
+
+## VIScene::RenderShadows (0x1144ac0, 108 bytes)
+
+Iterates the shadow caster list collected during RasterActor:
+
+```
+RenderShadows(scene)
+├── count = scene[0x1A88]    (max 128)
+├── list = scene+0x1888
+└── for each: RenderShadow(scene, actor)
+```
+
+---
+
 ## Cave Performance Bottleneck — Full Trace
 
 The complete call path from scene to the bottleneck:
@@ -542,20 +711,40 @@ VIScene::Render
                     ├── RasterSprite → room static geometry
                     └── Actor loop:
                           └── RasterActor
-                                ├── SetStaticLighting(actor.color)
+                                ├── SetStaticLighting(actor.color)  → scratchpad 0x70000200
                                 └── vtable->Render()
-                                      └── VIPointLight::Apply()
-                                            └── VIColorBuffer lock/compute/unlock
-                                                  └── Re-render geometry with new colors
-                                                        └── × N lights = N× overdraw
+                                      └── For each nearby VIPointLight:
+                                            ├── VIColorBuffer::Lock (get DMA buffer)
+                                            ├── VIColorBuffer::Color × N vertices
+                                            │   └── Build DMA packets, write RGBA >> 1
+                                            ├── VIColorBuffer::Unlock (finalize)
+                                            └── Submit DMA → VIF → VU1 → GIF → GS
+                                              └── Re-render geometry with light colors
 ```
 
 In a cave with 10 torches:
 - Each torch = VIParticleSprite (billboard particles) + VIPointLight
-- Each VIPointLight triggers VIColorBuffer lock → per-vertex color → unlock → re-render
-- 10 torches × (20 particles + light pass with geometry re-render) = 400+ draw ops
+- Each VIPointLight triggers: Lock → Color×N_vertices → Unlock → DMA submit → re-render
+- VIColorBuffer build state is GLOBAL — lights are processed sequentially
+- 10 torches × (20 particles + per-vertex color build + geometry re-render) = 400+ draw ops
+- Color() alone: 500 vertices × 10 lights = 5,000 calls, each building DMA command words
 
-**Native port fix**: Replace VIPointLight/VIColorBuffer with modern per-pixel lighting in a fragment shader. The vtable dispatch point in RasterActor is where we intercept — replace the virtual render call with our modern rendering path.
+### Why It's Slow (PS2-Specific)
+
+1. **Sequential**: Global static build state → one light at a time
+2. **Per-vertex**: Color() called once per vertex per light, not batched
+3. **DMA overhead**: Each light pass builds a full VIF→VU1→GIF DMA chain
+4. **Geometry re-render**: Each light re-submits ALL affected geometry through the pipeline
+5. **No accumulation**: Can't blend multiple lights in one pass (hardware limitation)
+
+### Native Port Fix
+
+Replace the entire VIColorBuffer mechanism:
+- **Delete**: Lock/Color/Unlock/DMA packet building
+- **Replace with**: Uniform buffer of light positions + colors
+- **Per-pixel lighting**: Fragment shader evaluates all lights in one pass
+- **Intercept point**: The vtable dispatch in RasterActor (vtable[0x1C])
+- **Result**: 10 lights = 1 draw call with 10-light fragment shader, not 10 draw calls
 
 ---
 
@@ -577,6 +766,223 @@ Passed through the render pipeline as the rendering context.
 | +0x28 | 4 | (flag/mode) |
 | +0x30 | 4 | cellIndex |
 | +0x34 | 4 | maxRenderDist (float) |
+
+---
+
+## VIZone::SetPretranslations (0x1115828, 204 bytes)
+
+PS2 floating-point precision fix. Shifts coordinate system so geometry is near-origin relative to camera.
+
+```
+SetPretranslations(zone, raster, camera)
+├── for each position in zone+0x58 (count at zone+0x54):
+│   output = source - camera.pos
+└── VIRaster::SetPreTranslations(raster, count, outputs, camera.pos)
+```
+
+---
+
+## VIRaster::SetProjection (0x1112f60, 60 bytes)
+
+Copies projection matrix to PS2 scratchpad and sets dirty flags.
+
+```
+SetProjection(raster, matrix)
+├── sceVu0CopyMatrix(0x70000040, matrix)   ← scratchpad
+├── raster+0x45E4 = 1                      ← projection dirty
+└── raster+0x45E0 = 1                      ← state dirty
+```
+
+---
+
+## VIAtmosphere::RenderSky (0x1067f38, 652 bytes)
+
+Multi-layer sky dome rendering.
+
+```
+RenderSky(atmosphere, scene, camera)
+├── Copy camera matrix, zero translation (sky at infinity)
+├── Sky dome sprite: atm[0x4E0], render mode=3
+├── Cloud layers (×3, if enabled):
+│   ├── Cloud 1: transform atm+0x500, sprite atm[0x4EC]
+│   ├── Cloud 2: transform atm+0x540, sprite atm[0x4F0]
+│   └── Cloud 3: transform atm+0x580, sprite atm[0x4F4]
+└── RenderStars (if not transitioning)
+```
+
+Render mode 3 = sky-specific (no depth write, alpha blending).
+
+---
+
+## VIAtmosphere::RenderWeather (0x10681c8, 1,464 bytes)
+
+Billboard particle rain/snow system.
+
+```
+RenderWeather(atmosphere, scene, camera)
+├── visibleCount = maxParticles × intensity, clamped
+├── viewAngle = 1 - dot(frustumNormal, normalize(frustumNormal.xz))
+├── for each particle (array at atm+0x0C, each 0x24 bytes):
+│   ├── pos += windOffset
+│   ├── size = baseSize × scale × viewAngleFactor
+│   ├── near-plane cull: hide if behind camera
+│   └── write to billboard batch
+├── BeginBillboards / EndBillboards (batched rendering)
+└── RenderSplashes (ground impacts)
+```
+
+Two material paths: single material for uniform weather, two-material split for heavy/light gradient. View angle factor makes rain look natural when looking up vs horizontal.
+
+---
+
+## VIRaster::SetModelView (0x1112f20, 56 bytes)
+
+Copies model-view matrix to scratchpad and sets dirty flags.
+
+```
+SetModelView(raster, matrix)
+└── sceVu0CopyMatrix(0x70000000, matrix)
+```
+
+---
+
+## VIRaster::SetMaterial (0x1113888, 68 bytes)
+
+Appends material setup commands to DMA chain.
+
+```
+SetMaterial(raster, materialId)
+├── AddMaterial(raster, materialId, &dmaBufPtr)
+└── FlushDMABufferIfFull(raster)
+```
+
+---
+
+## VIHSprite::SetBlendMatrices (0x1062ee0, 368 bytes)
+
+Computes and uploads bone skinning matrices.
+
+```
+SetBlendMatrices(sprite, raster)
+├── Scan attachments for unboned parts (boneIndex == -1)
+├── For each bone (count at sprite+0x40):
+│   ├── bone = sprite+0x48 + i * 0x100
+│   └── output[i] = bone.inverseBindPose × bone.currentTransform
+└── SetObjectBlends(raster, boneCount, blendMatrices)
+```
+
+### Bone Data (0x100 = 256 bytes per bone)
+
+| Offset | Size | Field |
+|--------|------|-------|
+| +0x30 | 64 | Current transform (animated) |
+| +0xA0 | 64 | Inverse bind pose |
+
+Output blend matrices at sprite+0x54, each 0x40 bytes (4x4 matrix). Standard `invBindPose × animTransform` skinning.
+
+---
+
+## VIRaster::BeginBillboards (0x110cb90, 1,616 bytes)
+
+Sets up VU1 BillboardMicro program and builds DMA packet for batched billboard rendering (particles, weather, sprites).
+
+```
+BeginBillboards(raster, &outputBuffer, batchSize)
+├── Clamp batchSize to 80 max
+├── Upload BillboardMicro VU1 program if not loaded
+│   (raster+0x4C4C: 0/1=RasterMicro, 2=BillboardMicro)
+├── If matrices dirty:
+│   ├── CalcMatrices(raster)
+│   ├── Build 0x340-byte DMA packet:
+│   │   ├── ModelView from scratchpad 0x70000000
+│   │   ├── Clip/viewport from scratchpad 0x70000080-0x700000C0
+│   │   ├── Projection × Viewport matrix
+│   │   ├── GIFtags for GS register setup
+│   │   ├── Billboard corner lookup (8 configs × 4 corners)
+│   │   ├── Static lighting color
+│   │   └── VIF MSCAL — kick VU1
+│   └── FlushDMABufferIfFull, clear dirty flag
+├── Write per-batch VIF header with billboard count
+└── *outputBuffer = billboard data start
+```
+
+### VU1 Program Selection (raster+0x4C4C)
+
+| Value | Program | Used For |
+|-------|---------|----------|
+| 0/1 | RasterMicro | Geometry, characters, world |
+| 2 | BillboardMicro | Particles, weather, billboards |
+
+---
+
+## VU1 Microcode Upload
+
+### UploadRasterMicro (0x1112460, 232 bytes)
+
+Uploads geometry processing VU1 program via DMA ref to DVP overlay data.
+
+```
+UploadRasterMicro(raster, &dmaPtr)
+├── DMA cnt: VIF STCYCL
+├── DMA ref → &.dma.1 (VU1 microcode from DVP overlay section)
+├── DMA cnt: VIF double-buffer setup
+│   ├── VIF BASE = PrimBuffer1
+│   └── VIF OFFSET = PrimBuffer2 - PrimBuffer1
+└── raster+0x4C4C = 1 (RasterMicro active)
+```
+
+### UploadBillboardMicro (0x1112548, 196 bytes)
+
+Uploads billboard VU1 program.
+
+```
+UploadBillboardMicro(raster, &dmaPtr)
+├── DMA cnt: VIF STCYCL
+├── DMA ref → &.dma.1 (billboard microcode)
+├── DMA cnt: VIF double-buffer setup
+│   ├── VIF BASE = 0x21A
+│   └── VIF OFFSET = 0xF0 (240 bytes)
+└── raster+0x4C4C = 2 (BillboardMicro active)
+```
+
+Both use DMA double-buffering: EE fills one VU1 data buffer while VU1 processes the other.
+
+---
+
+## CalcMatrices (0x1114388, 176 bytes)
+
+Computes the complete matrix pipeline and stores in scratchpad.
+
+```
+CalcMatrices(raster)
+├── scratchpad[0x080] = ModelView × Projection              (MVP)
+├── scratchpad[0x140] = MVP × Viewport                      (clip-to-screen)
+├── scratchpad[0x100] = Inverse(ModelView)                   (world→object)
+├── scratchpad[0x180] = normalize(InvMV.subMul(0x1A0))      (direction)
+└── if light2 enabled:
+    └── scratchpad[0x190] = InvMV × scratchpad[0x1C0]       (light→object)
+```
+
+---
+
+## PS2 Scratchpad Memory Map (0x70000000-0x70003FFF)
+
+Complete VU1 parameter block. For the native port, this becomes uniform buffer bindings.
+
+| Address | Size | Contents | Writer |
+|---------|------|----------|--------|
+| 0x70000000 | 64 | ModelView matrix | SetModelView |
+| 0x70000040 | 64 | Projection matrix | SetProjection |
+| 0x70000080 | 64 | MVP (ModelView × Projection) | CalcMatrices |
+| 0x700000C0 | 64 | Viewport transform | (external) |
+| 0x70000100 | 64 | Inverse ModelView | CalcMatrices |
+| 0x70000140 | 64 | MVP × Viewport (screen transform) | CalcMatrices |
+| 0x70000180 | 16 | Normalized direction vector | CalcMatrices |
+| 0x70000190 | 16 | Light direction (object space) | CalcMatrices |
+| 0x700001A0 | 16 | Direction source vector | (external) |
+| 0x700001C0 | 16 | Light position/direction | (external) |
+| 0x70000200 | 16 | Static lighting color (VIColor32F) | SetStaticLighting |
+| 0x70000220 | 3 | Light slot enables (3 slots) | EnableAllLights |
 
 ---
 
