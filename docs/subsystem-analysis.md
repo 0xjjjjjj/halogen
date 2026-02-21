@@ -435,21 +435,350 @@ SetPersonalLightMode(mode)
 
 ---
 
-## 6. Atmosphere System
+## 6. Atmosphere System (VIAtmosphere — 28 methods, 21.1 KB)
 
-From the recomp file listing:
+### Call Graph (ast-grep extracted)
 
 ```
-VIAtmosphere (28 methods, 21.1 KB)
-├── RenderSky(VIScene, VICamera)          ← Sky dome
-├── RenderStars(VIScene, VICamera)        ← Night sky stars
-├── RenderWeather(VIScene, VICamera)      ← Rain/snow particles
-├── RenderSplashes(VIScene, VICamera)     ← Rain splash effects
-├── Clear(VIScene)
-└── [24 more methods]
+Update(VIScene, VICamera, time, deltaTime)
+├── ProcessTransitions(VIScene, deltaTime1, deltaTime2)    ← Weather state machine
+│   ├── CopyLayer(VIMaterial)                               ← Transition blending
+│   ├── SetNumLayers / SetLayerBlendMode / SetLayerTexture ← Material reconfiguration
+│   ├── SetLayerColor(VIMaterial, VIColor32)                ← Sky color interpolation
+│   ├── Play / Stop / SetVolume / SetPan / SetPitch(VISoundDevice) ← Ambient audio!
+│   ├── ClearAllSplashes                                    ← Reset rain effects
+│   └── ResetLightning                                      ← Reset lightning system
+├── ProcessWeather(VIScene, VICamera)                       ← Per-frame weather sim
+│   ├── Init(VICollRay) / Init(VIEnvRay)                   ← Create raycasts
+│   ├── Collide(VIScene, ray)                               ← Cast rays at terrain!
+│   ├── GetHitPoint(VICollRay/VIEnvRay)                    ← Where rain hits ground
+│   ├── AddSplash(VIVect3)                                  ← Create splash at hit
+│   └── ProcessLavastorm(VIScene, VICamera)                 ← Lava effects
+│       ├── Create(VIParticleEmitter)                       ← Spawn lava particles
+│       ├── SetLocation(VIParticleEmitter)                  ← Position particles
+│       ├── Update(VIParticleEmitter)                       ← Tick simulation
+│       └── Destroy(VIParticleEmitter)                      ← Cleanup dead emitters
+├── RotateHPR(VIMatrix44)                                   ← Rotate sky dome
+├── Scale(VIMatrix44)                                       ← Scale sky dome
+└── Mul(VIMatrix44)                                         ← Compose transform
+
+RenderSky(VIScene, VICamera)
+├── SetModelView(VIRaster, Matrix44)     ← Sky orientation
+├── RenderStars(VIScene, VICamera)       ← Stars sub-pass
+│   ├── SetFog(VIRaster, 0)             ← Disable fog for stars
+│   ├── BeginBillboards(VIRaster)        ← Stars are billboards!
+│   ├── SetMaterial(VIRaster)            ← Star material
+│   └── EndBillboards(VIRaster)
+└── Mul(VIMatrix44)                      ← Sky dome transform
+
+RenderWeather(VIScene, VICamera)
+├── Plane(VIFrustum, i)                  ← Frustum planes for culling
+├── Normalize(VIVect3)                   ← Direction vectors
+├── BeginBillboards(VIRaster)            ← Rain/snow are billboards!
+├── SetMaterial(VIRaster)                ← Weather particle material
+├── SetModelView(VIRaster)               ← Camera-relative transform
+├── RenderSplashes(VIScene, VICamera)    ← Ground splash sub-pass
+│   ├── BeginBillboards(VIRaster)        ← Splashes are billboards too
+│   ├── SetMaterial(VIRaster)
+│   └── EndBillboards(VIRaster)
+└── EndBillboards(VIRaster)
+
+Init(VIRaster, flags)
+├── CreateMaterial(VIRaster) × many      ← Pre-create sky/weather materials
+├── Init(VIMaterial)                     ← Configure each layer
+├── SetLayerBlendMode / FillType / Modulate / LODBias / ZTest / ZWrite
+├── RotateHPR(VIMatrix44)               ← Pre-compute star rotations
+├── Mul(VIMatrix44, VIVect4)            ← Pre-compute star positions
+├── ps2__(VIParticleEmitter) × pool     ← Pre-allocate lava emitter pool
+└── Init(VILList) × several             ← Linked lists for splash/fireball pools
 ```
 
-The atmosphere system renders **four layers**: sky dome, stars, weather particles, and ground splashes. In outdoor areas, this adds 4 additional render passes. Combined with indoor lighting, this explains performance differences between indoor/outdoor scenes.
+**Key findings**:
+1. **Weather raycasting** — Rain doesn't just fall; the system casts rays at terrain to determine splash positions. This means outdoor weather has collision overhead per raindrop.
+2. **Everything is billboards** — Stars, rain/snow, splashes, and lava particles all use BeginBillboards/EndBillboards. In a storm, this could be hundreds of billboards.
+3. **Lavastorm has its own particle subsystem** — ProcessLavastorm creates/updates/destroys VIParticleEmitters dynamically, separate from the static particle system. Lava areas have both zone particles AND atmosphere particles.
+4. **Weather transitions involve audio** — ProcessTransitions calls Play/Stop/SetVolume/SetPan/SetPitch on VISoundDevice. Weather changes crossfade ambient sound.
+5. **Material layer manipulation** — Transitions reconfigure materials (layer count, blend mode, texture, color) per frame for sky dome blending. This is how sunrise/sunset works.
+
+---
+
+## 11. Audio System (VISoundDevice)
+
+### Architecture
+
+```
+VISoundDevice
+├── VIPlayback[]                ← Active sound instances (linked list pool)
+│   ├── VISound*                ← Reference to sound asset
+│   │   ├── VIWave (ADPCM)     ← Compressed audio (SPU2 hardware decode)
+│   │   └── VIXm (tracker)     ← XM tracker module format
+│   ├── channelMask (uint64)    ← Bitmask of allocated SPU2 channels (46 max!)
+│   └── soundClass              ← VISOUNDCLASS enum for volume grouping
+├── VILList<freeSpuMem>         ← SPU memory free list (linked list allocator)
+├── VILList<freeXmMem>          ← XM memory free list
+├── VILList<playbackPool>       ← Reusable playback instances
+└── IOP interface               ← EE→IOP RPC bridge
+```
+
+### Key Call Patterns
+
+```
+Play(soundId, flags, VISOUNDCLASS)
+├── Type(VISound) → Wave or Xm         ← Dispatch by format
+├── ChannelCount(VIWave/VIXm)           ← How many SPU2 channels needed
+├── AllocateChannels(channelsNeeded, priority)
+│   ├── FirstPlayback / NextPlayback    ← Walk active sounds
+│   ├── ChannelCount(existing)          ← Check if can steal channels
+│   └── Stop(existingId)               ← Evict lower-priority sounds!
+├── FirstChannel / NextChannel          ← Walk allocated channel IDs
+├── NewPlayback                         ← Get from pool
+└── SetIopFunction(cmd, params)         ← Send play command to IOP
+
+Stop(playbackId)
+├── Playback(id)                        ← Find playback instance
+├── StopChannels(channelMask)           ← Stop SPU2 hardware channels
+│   ├── FindIopFunction(cmd)            ← Look up IOP command slot
+│   └── SetIopFunction(cmd, 0)          ← Send stop to IOP
+├── DeallocateChannels(channelMask)     ← Free channel bitmask
+└── DeletePlayback(playback)            ← Return to pool
+
+SetVolume / SetPan / SetPitch(playbackId, value)
+├── Playback(id)                        ← Find instance
+├── Type(VISound) → Wave or Xm         ← Dispatch
+├── FirstChannel / NextChannel          ← Apply to all channels
+└── SetIopFunction(cmd, value)          ← Send to IOP
+```
+
+### IOP Communication
+
+The PS2 has a dedicated I/O Processor (IOP) that handles audio hardware (SPU2). All sound commands go through:
+
+```
+SetIopFunction(commandSlot, value)      ← Write to shared memory ring buffer
+FlushIopCommand(wait)                   ← sceSifSetDma → flush to IOP
+FindIopFunction(commandSlot)            ← Read back from IOP
+```
+
+This uses **SIF DMA** (`sceSifSetDma`, `sceSifDmaStat`) — the EE↔IOP communication bridge. For the native port, this entire IOP layer needs replacement with a modern audio backend.
+
+### Audio Formats
+
+| Format | Type | Hardware | Notes |
+|--------|------|----------|-------|
+| VIWave (ADPCM) | Compressed PCM | SPU2 decode | Most sound effects |
+| VIXm | Tracker module | Software decode | Music, ambient loops |
+| BGM | Background music | Streaming | `StreamBgm`, `StopAllBgm`, `BgmVersion` |
+
+### Channel Management
+
+SPU2 has **48 hardware voices**, but the engine reserves 46 (2 for system). Channel allocation uses a **bitmask** (uint64) where each bit = one SPU2 voice. When channels are exhausted, `AllocateChannels` **steals from lower-priority sounds** — priority eviction.
+
+**Key for native port**: Replace VISoundDevice + IOP bridge entirely. The VIWave ADPCM format is PS2-specific (Sony VAG/ADPCM). Need to either decode VAG→PCM or find a VAG decoder library.
+
+---
+
+## 12. World/Terrain System (VIWorld)
+
+### Architecture
+
+```
+VIWorld
+├── VIWorldTree                          ← Spatial tree for world geometry
+├── VIArray<VIZone>                      ← Zone array (from VIWorld::Init)
+├── VIArray<VIWorldRegion>               ← Regions (sub-zone groupings)
+├── VIVect3 origin                       ← World origin (pre-translation base)
+├── VIBBox extents                       ← World bounding box
+├── float cellSize                       ← Terrain grid cell size
+├── int xCells, zCells                   ← Grid dimensions (x × z multiply!)
+└── terrain profiles                     ← Height/material lookup
+```
+
+### Init Call Graph
+
+```
+Init(xCells, yUnused, zCells, cellSize, origin, extents)
+├── Init(VIArray<VIZone>, zoneCount)            ← Allocate zone array
+├── for each zone:
+│   └── Init(VIZone)                             ← Individual zone init
+│       ├── VIZoneTree::Init                     ← BSP tree per zone
+│       ├── VIArray<VIZoneRoom>::Init            ← Room array
+│       └── VIZoneRoom::Init per room            ← Per-room setup
+├── Init(VIWorldTree, xCells*zCells, 1)          ← World spatial tree
+├── SetProfiles(VIWorld)                         ← Terrain profile setup
+├── Init(VIArray<VIWorldRegion>, regionCount)    ← Region allocation
+└── Copy origin, extents, cell dimensions        ← Store grid params
+```
+
+**Key finding**: VIWorld uses a **grid-based terrain** with `xCells × zCells` cells of `cellSize` each. The terrain cell multiplication (`xCells * zCells`) uses hardware multiply (`MULT` instruction). `VIWorldTree` provides spatial lookups, while individual `VIZone`s handle BSP-based rendering within each cell.
+
+### Spatial Operations
+
+```
+RenderByFrustum(VISceneRendVars)
+├── PushFrustum(VIClipStack, VICamera)   ← Camera frustum to clip stack
+├── GetTop(VIClipStack)                  ← Get clip planes
+├── RenderByVolume(VIWorld)              ← Recursive render
+│   └── per zone: RenderByVolume(VIZone, VISceneRendVars)
+└── Pop(VIClipStack)                     ← Restore clip state
+
+Collide(zoneIndex, VISceneCollVars)      ← Delegates to VIZone::Collide
+InsertActor(zoneIndex, VISceneInsertVars) ← Delegates to VIZone::InsertActor
+Pick(zoneIndex, VIScenePickVars)          ← Delegates to VIZone::Pick
+
+QueryVisible(zoneIndex, VISceneVisQueryVars)
+QueryVisibleBySphere(VISceneVisQueryVars) ← Sphere-based visibility
+QueryProximal(zoneIndex, VISceneProxQueryVars)
+QueryEmitters(zoneIndex, VISceneEmitterQueryVars)
+QueryIntersection(zoneIndex, VISceneIntersectVars)
+QueryVolume(zoneIndex, VISceneBBoxQueryVars)
+```
+
+### Terrain Profile System
+
+```
+CalcTerrainCell(position) → (cellX, cellZ)     ← Position to grid cell
+CalcTerrainProfile(position) → profile          ← Get terrain material/height
+CalcTerrainCellBVolume(cellX, cellZ) → VIBBox   ← Cell bounding volume
+CalcProfileBlend(position) → VITerrainProfileBlend ← Blend between cells
+SetProfiles(VIWorld)                             ← Initialize profile table
+```
+
+**Terrain profiles** provide ground material type and height at any world position. `CalcProfileBlend` interpolates between adjacent cells for smooth transitions. This drives footstep sounds, movement speed, and visual effects.
+
+### Streaming Integration
+
+```
+Stream(zoneIndex, VISceneBBoxStreamVars)     ← Box-based streaming
+Stream(zoneIndex, VISceneStreamRadialVars)   ← Radial streaming
+StreamLeaf(zoneIndex, VISceneBBoxStreamVars) ← Per-leaf streaming decisions
+```
+
+VIWorld delegates streaming to per-zone, per-leaf granularity. Two streaming modes:
+- **BBox**: Stream zones overlapping a bounding box (for portals/doorways)
+- **Radial**: Stream zones within radius of player (for open areas)
+
+---
+
+## 13. Sprite Hierarchy (VIHSprite — 101 methods, VICSprite — 55 methods)
+
+### Type Hierarchy
+
+```
+VISprite (base — 8 types)
+├── VISimpleSprite          ← Textured quad
+├── VILODSprite             ← Level-of-detail switching
+├── VIHSprite               ← Hierarchical sprite (bone animation)
+│   └── VICSprite           ← Character sprite (armor, weapons, customization)
+├── VIGroupSprite           ← Transform group (parent→children)
+├── VIFloraSprite           ← Vegetation (billboard + wind)
+├── VIPointSprite           ← Point in space (waypoint, etc.)
+├── VIPointLight            ← Dynamic point light (VIColorBuffer overlay)
+├── VIParticleSprite        ← Particle emitter (billboard particles)
+├── VINameSprite            ← Text label (fonts)
+├── VISkinSprite            ← Skinned mesh (GPU skinning)
+└── VIStreamAudioSprite     ← Spatial audio emitter (3D sound)
+```
+
+### VIHSprite (Hierarchical Animated Sprite)
+
+```
+VIHSprite
+├── VIHSpriteNode[]                ← Bone hierarchy (VIVector<VIHSpriteNode>)
+├── VIHSpriteAnim                  ← Animation data
+│   ├── playMode, playSpeed        ← Playback settings
+│   └── numFramesPerNode           ← Animation clip data
+├── VIPool<VIHSpritePlay>          ← Active animations (blending pool)
+├── VIPool<VIHSpritePlayNode>      ← Per-node animation state
+├── VIPool<VIHSpriteAttachment>    ← Attached items (weapons, shields)
+├── VIArray<VIHSpriteTrigger>      ← Animation triggers (sound, VFX at frame N)
+├── VIVector<VIMatrix44>           ← Bone matrices (current pose)
+└── LOD level index                ← Current detail level
+```
+
+#### Animation System
+
+```
+AddPlay(animId, VIPlaybackType, speed, VIScene)          ← Start animation
+AddInterpolatedPlay(animId, type, blendTime, VIScene)    ← Blended transition
+AddInterpolatedPlayWithSync(animId, syncSource, syncTarget) ← Synced blend
+AddPlayWithSync(animId, syncFrame, VIScene)               ← Start at sync point
+StopPlayback(animId, VIScene)                             ← Stop animation
+FreezePlayback(animId, VIScene)                           ← Pause at current frame
+SetPlayFrame(animId, frame, VIScene)                      ← Seek to frame
+ErasePlay / EraseAllPlay                                  ← Remove from blend pool
+
+Process(animIndex, VIScene)                                ← Per-frame update
+├── ProcessPlayList(animIndex, VIScene)                    ← Advance all active anims
+├── ProcessPlayTiming(animIndex, VIScene)                  ← Handle blend timing
+├── ProcessHierarchy(VIHSprite)                            ← Compute bone transforms
+│   ├── ProcessUpHierarchy(boneIndex)                      ← Walk up to root
+│   └── CalcNodeTransform(boneIndex, Matrix44, VIScene)    ← Per-bone matrix
+└── UpdateCenterTransform(VIScene)                         ← Model center update
+
+Raster(VICamera, VIScene, VIRaster, flags)                 ← Render
+├── CalcLODLevelIndex(Matrix44)                            ← Distance-based LOD
+├── GetModelView(VIRaster)                                 ← Camera transform
+├── SetBlendMatrices(VIRaster)                             ← Upload bone matrices
+│   └── SetObjectBlends(VIRaster, count, Matrix44*)        ← GPU blend matrices
+└── [per attachment] Raster recursively                     ← Render attached items
+```
+
+### VICSprite (Character Sprite — extends VIHSprite)
+
+```
+VICSprite
+├── VICSpriteAttachSlot[]         ← Weapon hand, shield hand, helmet, etc.
+├── VICSpritePartEmitter[]        ← Per-bone particle emitters (fire hands, etc.)
+├── VICSpriteCust                 ← Customization system
+│   ├── VICSpriteRace             ← Race (elf, human, etc.)
+│   ├── VICSpriteArmorSet         ← Armor visual set
+│   ├── VICSpriteTint             ← Color tinting
+│   └── VICSpriteTextSlot         ← Texture slots (body, robe, face, hair)
+├── VICSpriteAnimID               ← Animation state machine
+└── VITrailFx                     ← Weapon trail VFX
+
+Key methods:
+SetAnimation(VICSpriteAnimID, flags, VIScene)    ← State machine transition
+SetArmorSlot(slot, armorSet, tint, VIScene)      ← Visual equipment change
+SetHelm(armorSet, tint, VIScene)                 ← Helmet change
+SetHair(style, color, flags, VIScene)            ← Hair customization
+SetItemAction(itemId, VIScene)                   ← Weapon type change
+SetLocomotion(animId, VIScene)                   ← Movement animation
+AttachItem(spriteId, slot, attackType, flags, VIScene) ← Attach weapon
+DetachItem(slot, VIScene)                        ← Remove weapon
+ProcessWeaponTrails(VICamera, VIScene, Matrix44) ← Weapon trail VFX update
+CalcVolumeAndPan(VICamera, position) → (vol, pan) ← 3D sound attenuation
+CalcSlotWorldTransform(nodeId, boneIndex, VIScene) → Matrix44 ← Attachment point
+```
+
+**Key finding**: VICSpriteCust reveals the character customization system — race, armor set, tint color, and per-slot textures (body, robe, face, hair) are all hot-swappable at runtime. `GetArmorSetTexture`, `GetFaceTexture`, `GetHairTexture`, `GetRobeTexture` show the texture lookup pipeline.
+
+### Sprite Copy Protocol
+
+Every sprite type implements `Copy(VIScene, VIRaster, VISoundDevice, VICollide, flags)` for multiplayer entity duplication. The copy protocol creates a new sprite in the scene, shares (ref-counts) all assets, and deep-copies mutable state.
+
+---
+
+## 14. Sprite-to-Subsystem Dependency Map
+
+```
+                   VIScene
+                     │
+         ┌───────────┼───────────────┐
+         │           │               │
+     VIWorld    VIAtmosphere    VISoundDevice
+         │           │               │
+     VIZone     [Billboard]     [IOP Bridge]
+    /  |  \          │               │
+  BSP Room Flora  VIParticle     SPU2 HW
+   │            /     │     \
+   └──── VIRaster ────┘     VIPointLight
+         │                     │
+    VIHSprite                VIColorBuffer
+         │                  (per-vertex overlay)
+    VICSprite
+    (customize, trails, sound)
+```
 
 ---
 
@@ -481,6 +810,18 @@ The engine uses C++ OOP (`VI*` prefix, `VIVect3`, `VIMatrix44`, `VIPool`/`VIArra
 
 ### 9. createByName is the entity factory boundary
 The 15.6 KB `createByName` function is the bridge between data-driven ESF loading and game entity instantiation. It constructs 100+ entity types via constructor calls, each parameterized by tag strings.
+
+### 10. Audio is IOP-dependent — needs full replacement
+VISoundDevice communicates with PS2 IOP via SIF DMA (`sceSifSetDma`). All audio goes through a command ring buffer to the IOP, which drives SPU2 hardware. VIWave uses Sony ADPCM (VAG format). For native port: replace entire VISoundDevice + IOP bridge with SDL_mixer or similar. VIXm (XM tracker) can use libxm.
+
+### 11. Weather has physics — rain raycasts into terrain
+VIAtmosphere::ProcessWeather casts VICollRay/VIEnvRay at terrain to find splash positions. Outdoor areas with weather incur per-drop collision overhead. Combined with billboard rendering for rain/snow, storms are expensive.
+
+### 12. Sprite hierarchy is deep and branching
+VIHSprite has 101 methods managing bone animation, LOD, attachments, triggers, and blend pools. VICSprite extends with 55 more for armor customization, weapon trails, and 3D audio attenuation. Each animated character involves: bone matrix computation → LOD selection → blend matrix upload → per-attachment recursive rendering → weapon trail VFX → particle emitter updates → sound attenuation.
+
+### 13. ast-grep works perfectly on PS2Recomp output
+`ast-grep --lang cpp --pattern '$FUNC(rdram, ctx, runtime)'` cleanly extracts all function calls from recomp files. This enables automated call graph extraction at scale across all 9,395 files.
 
 ---
 
