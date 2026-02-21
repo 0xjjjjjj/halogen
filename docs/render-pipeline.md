@@ -58,6 +58,20 @@ VIScene::Render (0x0113bb48, 912 bytes)
 11. Trail FX
 12. Weather (rain/snow)
 
+### VU1 Upload → Execute Pipeline
+
+```
+CalcMatrices(raster)                         ← build scratchpad matrices
+├── UploadMatrices(raster, dmaTag)           ← pack 21 QWs → VU1 addr 0-20
+│   └── trailing MSCAL(RInitOffset)          ← kick RasterMicro
+├── DrawPrimBufferTessPackVUNCG(...)          ← tessellated point light geometry
+│   ├── TessTriangle per lit triangle        ← subdivide + repack VUNCG
+│   └── MSCAL per bone group                 ← kick VU1 per batch
+└── BeginBillboards / EndBillboards          ← particle billboard path
+    ├── BeginBillboards: upload BillboardMicro + DMA BASE/OFFSET
+    └── EndBillboards: MSCAL(0x14)           ← kick BillboardMicro
+```
+
 ### Key State
 
 - `scene[0x12e5]`: Indoor/outdoor mode flag. 1 = portal rendering, 0 = frustum culling.
@@ -965,6 +979,473 @@ CalcMatrices(raster)
 
 ---
 
+## VIRaster::EndBillboards (0x0110d1e0, 224 bytes)
+
+Counterpart to BeginBillboards. Finalizes the billboard DMA packet and kicks VU1.
+
+```
+EndBillboards(raster):
+    if billboardCount <= 0: return -1     // nothing to flush
+
+    // Mark end-of-packet on last billboard DMA entry
+    lastEntry = dmaPtr + billboardCount * 0x30
+    lastEntry.flags |= 0x100              // EOP (end of packet)
+
+    // Append MSCAL VIF command → kicks VU1 BillboardMicro at entry 0x14
+    trailingQW = { 0, MSCAL(0x14), 0, 0 }  // VU1 instruction addr 20
+
+    // Write DMA cnt tag with total quadword count
+    totalQWs = (trailingQW + 0x30 - dmaDataStart) >> 4
+    writeDMATag(CNT, totalQWs)
+    advanceDMAPtr()
+
+    FlushDMABufferIfFull()
+    billboardCount = 0
+    return 0
+```
+
+**VU1 entry points confirmed:**
+- RasterMicro (general geometry): address = `RInitOffset` (kicked by UploadMatrices)
+- BillboardMicro (particles/billboards): address = `0x14` (=20, kicked by EndBillboards)
+
+---
+
+## VIRaster::UploadMatrices (0x01111f50, 804 bytes)
+
+Packs the complete VU1 parameter block into a 23-QW DMA packet. This is the bridge between scratchpad (EE) and VU1 data memory.
+
+```
+UploadMatrices(raster, dmaTagPtr):
+    // DMA cnt, 23 QWs
+    // VIF: STCYCL + UNPACK V4-32 × 21 vectors → VU1 addr 0
+
+    // === Matrices (12 QWs) ===
+    VU1[0..3]  = scratchpad[0x140]    // screen transform (MVP × Viewport)
+    VU1[4..7]  = scratchpad[0x080]    // MVP
+    VU1[8..11] = scratchpad[0x0C0]    // viewport
+
+    // === Per-frame parameters (9 QWs) ===
+    VU1[12] = { sp[0x180].x, -sp[0x188], sp[0x184], 0 }       // camera params
+    VU1[13] = { sp[0x190..0x198],                                // range params
+                specularEnabled ? 1.0/lightRadius : 1.0 }        // inv radius
+    VU1[14] = { raster.fogNear, sp[0x22C], 0, sp[0x228] }      // fog + flags
+
+    // === Lighting (3 QWs, conditional) ===
+    VU1[15] = ambientEnabled  ? sp[0x1AC..0x1B8] : zeros       // ambient RGBA
+    VU1[16] = specularEnabled ? sp[0x1D0..0x1D8] : zeros       // specular params
+    VU1[17] = dirLightEnabled ? sp[0x1E0..0x1EC] : zeros       // directional dir+color
+
+    // === Transform parameters (3 QWs) ===
+    VU1[18] = sp[0x210..0x21C]        // pre-translation scale
+    VU1[19] = sp[0x1F0..0x1FC]        // light attenuation params
+    VU1[20] = sp[0x200..0x208]        // light color/intensity
+
+    // === Trailing VIF command (QW 22) ===
+    { 0, 0, 0, MSCAL(RInitOffset) }  // kick VU1 RasterMicro
+
+    // Clear dirty flags
+    raster.pendingUploads = 0
+    sp[0x224] = { 0, 0, 0, 0 }       // light dirty flags
+```
+
+**VU1 Data Memory Map** (populated by UploadMatrices):
+
+| VU1 Addr | QWs | Contents | Scratchpad Source |
+|----------|-----|----------|-------------------|
+| 0-3 | 4 | Screen transform (clip → GS pixel coords) | 0x70000140 |
+| 4-7 | 4 | ModelViewProjection | 0x70000080 |
+| 8-11 | 4 | Viewport transform | 0x700000C0 |
+| 12 | 1 | Camera direction params | 0x70000180 |
+| 13 | 1 | Range + specular inverse radius | 0x70000190 |
+| 14 | 1 | Fog near distance + light flags | raster+0x45C8 |
+| 15 | 1 | Ambient light RGBA | 0x700001AC |
+| 16 | 1 | Specular/point light params | 0x700001D0 |
+| 17 | 1 | Directional light dir + color | 0x700001E0 |
+| 18 | 1 | Pre-translation scale | 0x70000210 |
+| 19 | 1 | Light attenuation params | 0x700001F0 |
+| 20 | 1 | Light color/intensity | 0x70000200 |
+
+For the native port, VU1 addrs 0-20 → a single uniform buffer binding.
+
+---
+
+## VIRaster::DrawPrimBufferTessPackVUNCG (0x011107e8, 2520 bytes)
+
+**The tessellated geometry submission path for dynamic point lights.** Only runs when specular/point lighting is enabled. Tests triangle-light intersections and uploads lit geometry to VU1.
+
+```
+DrawPrimBufferTessPackVUNCG(raster, primBufIndex, stripFlag, materialMask):
+    primBuf = raster.materialArray[primBufIndex]
+    if !specularEnabled || !raster.lightState: return 0
+
+    // Transform light into object space via inverse model-view
+    lightPosLocal = inverseModelView(sp[0x100]) × lightPosition(sp[0x1C0])
+    lightRadius = sp[0x1CC]
+
+    // Build axis-aligned bounding box around light volume
+    lightBBox.min = lightPosLocal - lightRadius
+    lightBBox.max = lightPosLocal + lightRadius
+
+    // Early out: light volume doesn't touch this geometry
+    if !lightBBox.Intersects(primBuf.bbox): return 0
+
+    for each materialGroup in primBuf:
+        material = lookupMaterial(group)
+        if !(material.flags & materialMask): skip
+
+        AddMaterial(raster, material, dmaPtr)
+
+        for each triangleStrip in group:
+            if !lightBBox.Intersects(strip.bbox): skip
+
+            // Decode vertices: stored as shorts, scaled + offset
+            //   pos = (short)rawPos × preTrans.scale + groupOrigin
+            v0 = decodeVertex(strip, 0)
+            v1 = decodeVertex(strip, 1)
+
+            for triIdx = 2..strip.vertCount:
+                v2 = decodeVertex(strip, triIdx)
+                triBBox = BBox.Init(v0, v1, v2)
+
+                if triBBox.Intersects(lightBBox):
+                    // Triangle strip winding alternation
+                    if triIdx & 1:
+                        TessTriangle(v0, v2, v1, ...)
+                    else:
+                        TessTriangle(v1, v2, v0, ...)
+
+                    // Upload tessellated vertices per bone group
+                    for each boneGroup:
+                        // VIF UNPACK V4-32, 4 QWs per vertex:
+                        //   QW0: (pos.x,  pos.y,  pos.z,  1.0)
+                        //   QW1: (norm.x, norm.y, 1.0,    0)
+                        //   QW2: (u,      v,      extra,  0)
+                        //   QW3: (color.r, color.g, color.b, color.a)
+
+                        MSCAL(kickAddress)     // execute VU1
+                        FlushDMABufferIfFull()
+
+                // Rotate strip: v0←v1, v1←v2
+                v0 = v1; v1 = v2
+```
+
+**Source vertex layout** (VUNCG format, 48 bytes per vertex):
+
+| Offset | Size | Field |
+|--------|------|-------|
+| 0x00 | 12 | position (x, y, z) float |
+| 0x0C | 8 | UV (u, v) float |
+| 0x14 | 4 | extra/weight |
+| 0x18 | 16 | color (r, g, b, a) float |
+| 0x28 | 8 | normal (x, y) float |
+
+**Performance note**: This is the hot path for the cave bottleneck. Every triangle that intersects a point light volume gets tessellated and re-uploaded. With 10 torches, most cave geometry gets processed 10 times through this function.
+
+---
+
+## VIColorBuffer::CalcDataSize (0x010c0470, 308 bytes)
+
+Computes the DMA buffer size needed for per-vertex color overlay. This quantifies the per-light DMA cost.
+
+```
+CalcDataSize(colorBuf, primBuf):
+    if primBuf.type != 2: return -1       // indexed strips only
+
+    numGroups = primBuf.numGroups         // +0x40
+    numStrips = primBuf.numStrips         // +0x48
+    stripArray = primBuf.stripArray       // +0x5C, stride 28 bytes
+
+    // Section 1: Group headers (8 bytes each, 16-aligned)
+    headerSize = align16(numGroups × 8)
+    colorBuf.headerOffset = headerSize    // +0x28
+
+    // Section 2: Vertex color entries (16 bytes each)
+    totalVertColors = numStrips × 2 + numGroups
+    colorBuf.totalVertColors = totalVertColors    // +0x18
+    totalSize = headerSize + totalVertColors × 16
+    totalSize = align16(totalSize)
+
+    // Section 3: Per-strip color data
+    stripDataQWs = 0
+    for i in 0..numStrips:
+        vertCount = stripArray[i].vertexCount     // stride 28 bytes
+        stripDataQWs += ceil((vertCount + 4) / 4)
+
+    colorBuf.stripDataQWs = stripDataQWs          // +0x20
+    colorBuf.stripDataOffset = totalSize           // +0x2C
+    totalSize = align16(totalSize + stripDataQWs × 16)
+    colorBuf.totalSize = totalSize                 // +0x30
+```
+
+**VIColorBuffer struct layout (partial):**
+
+| Offset | Field |
+|--------|-------|
+| +0x18 | totalVertColors |
+| +0x20 | stripDataQWs |
+| +0x24 | (reset) |
+| +0x28 | headerOffset |
+| +0x2C | stripDataOffset |
+| +0x30 | totalSize (DMA buffer bytes) |
+
+**VIPrimBuffer strip entry** (28 bytes = 7 dwords):
+
+| Offset | Field |
+|--------|-------|
+| +0x00 | vertexCount per strip |
+| +0x04-0x18 | other strip metadata |
+
+**Cave bottleneck cost formula:**
+```
+DMA_per_light = align16(numGroups × 8)
+              + align16((numStrips × 2 + numGroups) × 16)
+              + align16(Σ ceil((vertCount_i + 4) / 4) × 16)
+
+Total_DMA_per_frame = DMA_per_light × numActiveLights
+```
+
+---
+
+## VIPointLight::ClampScale (0x010c3790, 444 bytes)
+
+Clamps point light billboard scale to prevent excessive overdraw.
+
+```
+ClampScale(light, matrix):
+    MAX_SCALE = 4.0
+
+    // Extract scale magnitude from each column of the 3×3 rotation sub-matrix
+    scaleX = length(matrix.col0)    // sqrt(m00² + m01² + m02²)
+    scaleY = length(matrix.col1)    // sqrt(m10² + m11² + m12²)
+    scaleZ = length(matrix.col2)    // sqrt(m20² + m21² + m22²)
+
+    // Clamp each axis to max scale of 4.0
+    if scaleX > 4.0:  matrix.col0 *= 4.0 / scaleX
+    if scaleY > 4.0:  matrix.col1 *= 4.0 / scaleY
+    if scaleZ > 4.0:  matrix.col2 *= 4.0 / scaleZ
+```
+
+Called from `VIPointLight::Raster` before billboard rendering. Prevents light billboard quads from exceeding 4× reference size.
+
+---
+
+## VIScene::RenderShadow (0x0113bed8, 2300 bytes)
+
+Renders a **planar projected shadow** for a single actor. Not a shadow map — the shadow texture is projected as a decal onto ground geometry.
+
+```
+RenderShadow(scene, actorIndex):
+    if scene.shadowMaterialIndex == -1: return -1
+
+    sprite = GetActorSpritePtr(scene, actorIndex)
+    if !sprite: return -1
+
+    // Get actor transform + inverse
+    GetActorTransform(scene, actorIndex, worldMatrix)
+    invWorldMatrix = Invert(worldMatrix)
+
+    // 6 bone slots define shadow footprint (feet, torso, hands)
+    slotIDs = static_table[6]    // from DAT_011db500
+    for i in 0..5:
+        CalcSlotWorldTransform(sprite, slotIDs[i], ...)
+        localPos = invWorldMatrix × slotWorldPos
+        if i > 3: localPos *= 0.5    // extremity bones at 50% influence
+        bonePositions[i] = localPos
+
+    // Build shadow bbox from bone positions
+    shadowBBox = BBox(6, bonePositions)
+    shadowBBox.min.xz -= 0.2         // pad XZ, no Y padding
+    shadowBBox.max.xz += 0.2
+
+    // World-space query volume
+    worldBBox = shadowBBox.Transform(worldMatrix)
+    actorY = GetActorLocation(scene, actorIndex).y
+    worldBBox.min.y = actorY - 1.0   // 1 unit below
+    worldBBox.max.y = actorY + 0.5   // 0.5 above
+
+    // Find ground triangles under shadow
+    VIQueryTriList.Reset(maxDist=80.0, worldBBox, dir=(0,1,0))
+    QueryIntersection(scene, worldBBox, actorFilter, triList)
+
+    SetMaterial(raster, scene.shadowMaterialIndex)
+    SetZBias(raster, 15)              // avoid z-fighting with ground
+
+    for each tri in triList:          // stride 40 bytes per triangle
+        // Lift vertices 0.04 above ground
+        v0.y += 0.04; v1.y += 0.04; v2.y += 0.04
+
+        // Per-vertex opacity: fades with height distance from actor
+        alpha_i = (1.0 - clamp(actorY - v_i.y, 0, 1)) × 0.65
+
+        // Project UVs: world → actor local XZ, normalized to bbox
+        u = (invMat × v.xz - bboxMin.xz) / (bboxMax.xz - bboxMin.xz)
+
+        BeginTriFan(raster)
+        Color({1,1,1, alpha0}); UV({u0,v0}); Vertex(v0)
+        Color({1,1,1, alpha1}); UV({u1,v1}); Vertex(v1)
+        Color({1,1,1, alpha2}); UV({u2,v2}); Vertex(v2)
+        EndTriFan(raster)
+
+    SetZBias(raster, 0)
+```
+
+**Shadow technique**: Planar projection decal. No shadow maps, no stencil — the shadow texture is UV-mapped onto ground triangles using the actor's inverse transform. Max opacity 65%, fading to transparent 1+ units below. Z-bias 15 prevents z-fighting. 6 bone slots define the shadow footprint shape.
+
+**For native port**: Replace with shadow maps. The bone-based bbox is still useful as a shadow camera frustum hint.
+
+---
+
+## VIRaster::InitGSRegisters (0x011147b8, 236 bytes)
+
+One-time GS hardware initialization. Sets depth test, color clamp, and dither matrix via GIF path.
+
+```
+InitGSRegisters(raster, dmaTagPtr):
+    // DMA cnt, 5 QWs
+    // VIF: FLUSHE + DIRECT 4 (send 4 QWs to GIF)
+    // GIF tag: PACKED mode, 3 A+D register writes, EOP
+
+    GS_COLCLAMP (0x46) = 1                       // enable color clamping [0,255]
+    GS_TEST_1   (0x47) = 0x30000                  // ZTST = GEQUAL (3)
+    GS_DIMX     (0x44) = 0x6071243571603524       // ordered 4×4 dither matrix
+
+    raster.gsInitialized = 1                      // +0x459C
+```
+
+**GS → Vulkan mapping:**
+
+| GS Register | Value | Vulkan Equivalent |
+|-------------|-------|-------------------|
+| COLCLAMP (0x46) | 1 | Default (always clamped in modern GPUs) |
+| TEST_1 (0x47) | ZTST=GEQUAL | `VK_COMPARE_OP_GREATER_OR_EQUAL` |
+| DIMX (0x44) | ordered dither | Skip (32-bit color depth makes dithering unnecessary) |
+
+---
+
+## VIRaster::SetFogRegisters (0x0110fbc8, 504 bytes)
+
+Writes the GS fog color register.
+
+```
+SetFogRegisters(raster):
+    // Convert float fog color → byte RGB
+    fogR = byte(raster.fogColorR × 255 + 0.5)    // +0x4498
+    fogG = byte(raster.fogColorG × 255 + 0.5)    // +0x449C
+    fogB = byte(raster.fogColorB × 255 + 0.5)    // +0x44A0
+
+    // DMA cnt, 3 QWs. VIF: FLUSHE + DIRECT 2
+    // GIF: PACKED, 1 A+D write, EOP
+    GS_FOGCOL (0x3D) = pack_rgb(fogR, fogG, fogB)
+```
+
+**VIRaster fog color** stored at offsets +0x4498/+0x449C/+0x44A0 as float RGB [0,1].
+
+For native port: fragment shader `fragColor = mix(fragColor, fogColor, fogFactor)`.
+
+---
+
+## VIParticleDefinitionEx::BlendMotifs (0x010b3410, 2648 bytes)
+
+Blends multiple particle motifs into a single set of attributes using weighted interpolation. This is how the engine smoothly transitions between particle styles (fire→smoke, snow→rain).
+
+```
+BlendMotifs(baseDef, output):
+    // Phase 1: Full copy base → output (724 bytes / 181 floats)
+    output = copy(baseDef)
+
+    // Phase 2: Iterate motif pool and blend
+    motifPool = baseDef.motifPool     // at +0xB5 (float offset)
+    for each motif in motifPool:
+        weight = motif.blendWeight    // offset 0xB2, range [0,1]
+        if weight == 0: skip
+
+        // Weighted additive blend:
+        //   result += (motif - base) × weight
+        // At weight=1.0, motif fully overrides. At 0.5, halfway.
+
+        // Blend core params (14 floats at offset 0x00)
+        for i in 0..13: output[i] += (motif[i] - base[i]) × weight
+
+        // Blend keyframe data (128 floats at offset 0x0E)
+        // 32 keyframes × 4 channels (RGBA or size/rotation curves)
+        for i in 0..127: output[0x0E+i] += (motif[...] - base[...]) × weight
+
+        // Blend extended params (29 floats at offset 0x8E)
+        // Blend misc param at offset 0xB4
+
+    // Phase 3: Post-blend validation
+    // Set boolean "has gradient" flags for 5 color gradient triplets
+    // Stored as float: 0.0 = false, 1e-45 (0x00000001 bits) = true
+    for triplets at 0x99..0xAA:
+        if any channel != 0: set flag = 1e-45
+        else: flag = 0.0
+```
+
+**VIParticleAttributes struct** (~724 bytes, 181 floats):
+
+| Offset | Count | Contents |
+|--------|-------|----------|
+| 0x00-0x0D | 14 | Core: birthrate, lifespan, velocity, gravity, friction, nozzle |
+| 0x0E-0x8D | 128 | 32 lifetime keyframes × 4 channels (color/size/rotation curves) |
+| 0x8E-0x95 | 8 | Extended params (spread, turbulence?) |
+| 0x96-0x98 | 3 | Additional params |
+| 0x99-0xAA | 18 | Color gradient channels (6 RGB triplets: birth→death colors) |
+| 0xAB-0xAF | 5 | Gradient enable flags (boolean as float) |
+| 0xB0-0xB2 | 3 | Blend params (0xB2 = blend weight) |
+| 0xB3-0xB4 | 2 | Final params |
+
+**Blend formula**: `result = base + Σ (motif_i - base) × weight_i`
+
+---
+
+## VIRaster::StretchBlit (0x0110bf08, 2680 bytes)
+
+Screen-space textured quad blit with UV rotation. Used for all 2D overlays (UI, health bars, inventory, loading screens).
+
+```
+StretchBlit(alpha, raster, texIndex, flags, screenPos, screenSize,
+            srcUV, srcUVSize, blendMode):
+    texture = raster.textureArray[texIndex]
+    invTexW = 1.0 / texture.width      // +0x0C
+    invTexH = 1.0 / texture.height     // +0x08
+
+    if currentProgram != RasterMicro: UploadRasterMicro()
+
+    // Material: dither on unless flags & 4
+    SetDither(material, !(flags & 4))
+    AddMaterial(raster, material, dmaPtr)
+    BlitBegin(raster, dmaPtr)
+
+    // Build screen quad (4 vertices, 64 bytes each)
+    // Screen transform: sx = ((px - offset) + 0.5) × scale
+    //                   sy = ((py - offset) + 0.5) × -scale  (Y flipped)
+    v0 = screenPos                     // top-left
+    v1 = (x+w, y)                      // top-right
+    v2 = (x+w, y+h)                    // bottom-right
+    v3 = (x, y+h)                      // bottom-left
+
+    // Per-vertex: color = (1.0, 1.0, 1.0, alpha)
+    //             normal = (0, 0, 0, 0)
+
+    // UV rotation (flags & 3):
+    //   0 = normal    1 = H-flip    2 = V-flip    3 = 180° rotate
+    // UVs normalized: u = texel × invTexW, v = texel × invTexH
+
+    BlitEnd(raster, dmaPtr)
+    FlushDMABufferIfFull()
+```
+
+**Blit vertex layout** (64 bytes per vertex):
+
+| Offset | Size | Contents |
+|--------|------|----------|
+| +0x00 | 16 | position (screenX, screenY, 0, 1.0) |
+| +0x10 | 16 | UV (u, v, 1.0, 0) |
+| +0x20 | 16 | normal (0, 0, 0, 0) |
+| +0x30 | 16 | color (1.0, 1.0, 1.0, alpha) |
+
+---
+
 ## PS2 Scratchpad Memory Map (0x70000000-0x70003FFF)
 
 Complete VU1 parameter block. For the native port, this becomes uniform buffer bindings.
@@ -977,12 +1458,24 @@ Complete VU1 parameter block. For the native port, this becomes uniform buffer b
 | 0x700000C0 | 64 | Viewport transform | (external) |
 | 0x70000100 | 64 | Inverse ModelView | CalcMatrices |
 | 0x70000140 | 64 | MVP × Viewport (screen transform) | CalcMatrices |
-| 0x70000180 | 16 | Normalized direction vector | CalcMatrices |
-| 0x70000190 | 16 | Light direction (object space) | CalcMatrices |
+| 0x70000180 | 16 | Camera direction params | CalcMatrices |
+| 0x70000188 | 4 | Camera Z param (negated for VU1) | CalcMatrices |
+| 0x70000190 | 12 | Range/distance params | CalcMatrices |
 | 0x700001A0 | 16 | Direction source vector | (external) |
+| 0x700001AC | 16 | Ambient light RGBA | (external) |
 | 0x700001C0 | 16 | Light position/direction | (external) |
-| 0x70000200 | 16 | Static lighting color (VIColor32F) | SetStaticLighting |
-| 0x70000220 | 3 | Light slot enables (3 slots) | EnableAllLights |
+| 0x700001CC | 4 | Light radius (specular) | (external) |
+| 0x700001D0 | 12 | Specular light params | (external) |
+| 0x700001E0 | 16 | Directional light dir + color | (external) |
+| 0x700001F0 | 16 | Light attenuation params | (external) |
+| 0x70000200 | 16 | Light color/intensity | SetStaticLighting |
+| 0x70000210 | 16 | Pre-translation scale | (external) |
+| 0x70000220 | 1 | Directional light enable flag | EnableAllLights |
+| 0x70000221 | 1 | Ambient light enable flag | EnableAllLights |
+| 0x70000222 | 1 | Specular/point light enable flag | EnableAllLights |
+| 0x70000224 | 4 | Light dirty flags (cleared by UploadMatrices) | various |
+| 0x70000228 | 4 | Unknown light param | (external) |
+| 0x7000022C | 4 | Unknown light param | (external) |
 
 ---
 
