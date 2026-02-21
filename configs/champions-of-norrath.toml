@@ -1,13 +1,13 @@
 # PS2Recomp config for Champions of Norrath (NTSC-U)
 # Serial: SLUS-20565
-# ELF: BASLUS_20565.ELF
-#
-# Adjust paths once binary is acquired.
+# ELF: SLUS_205.65
 
-input = "BASLUS_20565.ELF"
-output_dir = "output/champions-of-norrath/"
+[general]
+input = "bin/SLUS_205.65"
+output = "output/champions-of-norrath/"
+single_file_output = false
 
-# Standard PS2 libc stubs — these are provided by the PS2 kernel/runtime
+# Standard PS2 libc stubs
 stubs = [
     "printf",
     "sprintf",
@@ -28,15 +28,8 @@ stubs = [
     "strcat",
 ]
 
-skips = [
-    "abort",
-    "exit",
-    "_exit",
-]
+# Functions to skip
+skip = ["abort", "exit", "_exit"]
 
-# Multi-file output for easier analysis
-# Each TU becomes a separate .cpp file
-single_file = false
-
-# Enable relocations (required for most PS2 games)
-use_relocations = true
+[patches]
+instructions = []

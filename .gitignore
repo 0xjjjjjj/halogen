@@ -6,6 +6,9 @@
 *.elf
 *.ELF
 
+# Extracted game binaries
+bin/
+
 # PS2Recomp build artifacts
 vendor/
 
