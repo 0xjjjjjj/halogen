@@ -759,25 +759,207 @@ Every sprite type implements `Copy(VIScene, VIRaster, VISoundDevice, VICollide, 
 
 ---
 
-## 14. Sprite-to-Subsystem Dependency Map
+## 15. Engine Boot Sequence (engineInit → ps2_main → gameLoop)
+
+### engineInit(frameRate) — Hardware Initialization
+
+Called once at startup. Initializes ALL engine subsystems in order:
 
 ```
-                   VIScene
-                     │
-         ┌───────────┼───────────────┐
-         │           │               │
-     VIWorld    VIAtmosphere    VISoundDevice
-         │           │               │
-     VIZone     [Billboard]     [IOP Bridge]
-    /  |  \          │               │
-  BSP Room Flora  VIParticle     SPU2 HW
-   │            /     │     \
-   └──── VIRaster ────┘     VIPointLight
-         │                     │
-    VIHSprite                VIColorBuffer
-         │                  (per-vertex overlay)
-    VICSprite
-    (customize, trails, sound)
+engineInit(frameRate)
+├── memInit(heapBase, heapSize)          ← Memory system (before everything!)
+├── blockAllocInit                       ← Block allocator
+├── listInit                             ← Global linked list system
+├── sceGsResetGraph / sceDmaReset        ← Graphics Synthesizer + DMA reset
+├── initSif                              ← SIF (EE↔IOP bridge)
+├── initVIF                              ← VIF (VU Interface)
+├── initSupersample                      ← Supersampling setup
+├── sceGsSetDefDispEnv / sceGsPutDispEnv ← Display environment
+├── textureInit(width, height)           ← Texture cache + decompress
+├── textureAllocateCacheBuffer           ← EDRAM texture cache
+├── emathInit                            ← Engine math (VU0 math routines)
+├── drawInit                             ← Draw list system
+├── animInit                             ← Animation system
+├── floorInit                            ← Floor/terrain system
+├── lightInit                            ← Lighting (VIColorBuffer setup)
+├── objectInit                           ← Object system (game entities)
+├── padInit                              ← Controller input
+├── soundInit(frameRate)                 ← VISoundDevice + IOP audio
+├── cdInit                               ← CD/DVD filesystem
+├── worldInit                            ← World/terrain system
+├── scriptInit                           ← AMX/Pawn VM
+├── P_Init                               ← Particle system
+├── lumpLoad("common")                   ← Load common resource lumps
+├── lumpLock(0)                          ← Lock common resources
+└── AddIntcHandler / EnableIntc          ← Register interrupt handlers
+```
+
+**Key insight**: The init order reveals dependencies. Memory → lists → GPU → DMA → textures → drawing → lighting → objects → input → audio → filesystem → world → scripting → particles. For the native port, this is the replacement order — each subsystem can be replaced independently as long as the initialization order is preserved.
+
+### ps2_main — Application Entry Point
+
+```
+ps2_main(argc, argv)
+├── initChars(argc, argv)                ← Parse command line
+├── engineInit(frameRate)                ← Engine init (above)
+├── gameInit                             ← Game-specific init
+├── MC_Init / MC_Configure               ← Memory card system
+├── frontEndInit(mode)                   ← UI/menu system
+├── DLG_Init / DLG_InitNet              ← Dialog system + network dialogs
+├── commInitNet                          ← Network message handlers
+├── hudInitNet / inventoryInitNet / shopInitNet / textInitNet
+│                                        ← Net-aware subsystems
+├── cutInitNet                           ← Cutscene network sync
+├── gameBoot                             ← Game boot (just Camera + skill ramps)
+├── gameLoop                             ← MAIN LOOP (never returns during play)
+│   ├── [see below]
+├── lumpClear / netFree                  ← Cleanup
+└── [cleanup sequence]
+```
+
+### gameLoop — Main Frame Loop
+
+```
+gameLoop
+├── engineFrameStart(vsyncCount, isGameActive)  ← Begin frame
+│   ├── sceGsResetGraph / sceGsSyncV            ← VSync
+│   └── [DMA buffer swap]
+├── padProcess                                   ← Read controller input
+├── cdProcess                                    ← Check async CD reads
+├── texProcessLoad / texProcessDecompress        ← Async texture pipeline
+├── lumpCheck                                    ← Resource lump management
+├── soundFrame                                   ← Audio frame (VISoundDevice)
+├── animFrame                                    ← Animation tick
+├── runMusic                                     ← Music system update
+├── netGameStep(...)                             ← Network frame sync
+├── coreGameStep(step, flags)                    ← SIMULATION
+│   ├── padRunFrame                              ← Process input
+│   ├── engineRunTasks(step, flags)              ← Run registered tasks
+│   ├── enumerateAlivePlayers                    ← Player state
+│   └── gameCheckForDeathScreen                  ← Death check
+├── scriptRun                                    ← AMX/Pawn VM execution
+├── Update(Camera)                               ← Camera update
+├── gameDrawWorld                                ← RENDERING
+│   ├── worldSetViewCenter                       ← Set camera in world
+│   ├── worldDrawWorld(worldHeader)              ← World geometry render
+│   ├── drawAutoMap                              ← Minimap overlay
+│   └── drawDome                                 ← Sky dome
+├── drawListClear                                ← Reset draw lists
+├── P_Clear                                      ← Reset particle system
+├── engineFrameEnd(isActive)                     ← End frame
+│   ├── [DMA flush + buffer swap]
+│   └── [VSync wait]
+└── [loop back to engineFrameStart]
+```
+
+**Key insight**: The frame loop is split into simulation (`coreGameStep` + `scriptRun`) and rendering (`gameDrawWorld`). These are NOT decoupled — simulation and rendering happen sequentially in the same frame. For the native port, we could potentially decouple these for multi-threaded rendering.
+
+### Window/UI System (VIWnd — 14+ window types)
+
+```
+VIWnd (base)
+├── VIWndCombo          ← Dropdown/combo box
+├── VIWndConnect        ← Network connection wizard (DNAS, ISP config)
+├── VIWndDnas           ← Sony DNAS authentication
+├── VIWndEdit           ← Text input field
+├── VIWndEula           ← EULA/legal text display
+├── VIWndGenericRenderer ← Data-driven UI renderer (VIGUIPage, VIFlatFile)
+├── VIWndLegal          ← Legal notice screen
+├── VIWndMcErr          ← Memory card error dialogs (18+ screens!)
+├── VIWndMessage        ← Message/dialog box
+├── VIWndOptions        ← Game options (sound, interface, graphics)
+├── VIWndPatcher        ← Online patch downloader
+├── VIWndReadMessage    ← Message reader (scrollable text)
+├── VIWndSplash         ← Splash/loading screen
+└── VIWndStationLogin   ← Station.com login (SOE online services)
+```
+
+The UI system is a widget hierarchy: `VIWnd` is the base, with `AddChild/RemoveChild` for tree structure, `OnDraw/OnDrawSelf` for rendering, `OnKeyDown/OnKeyUp/OnSelect` for input, and `HandleEvent/OnMessage` for event dispatch. `VIWndGenericRenderer` is the most complex — a data-driven renderer using `VIGUIPage` and `VIFlatFile` for XML-like UI definitions.
+
+**For native port**: VIWndConnect, VIWndDnas, VIWndStationLogin, VIWndPatcher are all PS2/SOE online-specific — these entire windows can be removed. VIWndMcErr (memory card errors) becomes save file errors. The core VIWnd hierarchy and VIWndGenericRenderer are reusable.
+
+---
+
+## 16. Networking Stack (344 files!)
+
+```
+Transport Layer:
+├── VITCPSocket2         ← TCP socket wrapper
+├── VIUDPSocket          ← UDP socket wrapper
+├── TcpManager           ← Connection management
+├── TcpConnection        ← Per-connection state (refcounted)
+├── connection_t         ← Low-level connection struct
+│   ├── connection_allocate_state_channels
+│   ├── connection_add_rtt_sample     ← RTT tracking!
+│   └── connection_append             ← Buffer management
+└── GenericAPI::GenericConnection      ← Abstraction layer
+
+Protocol Layer:
+├── packet_*             ← Packet serialization
+├── message_list_t       ← Message queuing
+├── drdp_*               ← "DRDP" protocol (Dark Alliance Reliable Data Protocol?)
+│   └── drdp_address_to_endpoint
+└── buffer_t             ← I/O buffers
+
+Game Network:
+├── netInit / netStart / netFree       ← Lifecycle
+├── netGameStep(isActive, isHost)      ← Per-frame sync
+├── netPlayerIsConnected / netPlayerIsLocal
+├── netRegisterMessageHandler          ← Message dispatch table
+├── netRegisterPacketHandler           ← Packet dispatch table
+├── netWaitForPeersToCatchUp           ← Frame sync barrier
+├── netClearContact / netInContact     ← Connection status
+└── netStartNetworkGameInit            ← Game session setup
+
+Platform:
+├── sceInetCtlGetState     ← PS2 network adapter state
+├── sceSifLoadModule       ← Load IOP network modules
+├── VIEELoadIrx            ← Load IRX (IOP Relocatable eXecutable)
+├── sceDNAS2Status         ← Sony DNAS authentication
+└── commInitNet            ← Register all network handlers
+```
+
+**Key finding**: The networking stack is substantial — 344 files, a custom reliable protocol ("DRDP"), RTT tracking, frame sync barriers. This is a peer-to-peer architecture (no dedicated server). For the native port, this needs replacement with a modern networking library (ENet, GameNetworkingSockets, etc.) but the game-level message/packet handler registration pattern (`netRegisterMessageHandler`) can be preserved.
+
+---
+
+## 17. Full Engine Dependency Map
+
+```
+                        ps2_main
+                           │
+                ┌──────────┼──────────┐
+           engineInit    gameInit    gameLoop
+                │           │           │
+         ┌──────┤      ┌────┤      ┌────┼────────┐
+         │      │      │    │      │    │         │
+      VIRaster  │   createByName  coreGameStep  gameDrawWorld
+         │      │      │           │              │
+    [DMA/GS]    │   Creature    scriptRun      worldDrawWorld
+                │   Player      (AMX/Pawn)        │
+            VIScene                            drawDome
+               │                              drawAutoMap
+    ┌──────────┼───────────────┐
+    │          │               │
+VIWorld   VIAtmosphere   VISoundDevice   VILoader
+    │          │               │             │
+ VIZone    [Raycasts]    [IOP Bridge]    [Async I/O]
+  / | \    [Billboards]   [SPU2 HW]     [ESF Parse]
+BSP Room Flora   │             │
+  │         VIParticle      VIWave/VIXm
+  │        /    │    \
+  └─ VIRaster ──┘   VIPointLight
+       │                │
+  VIHSprite         VIColorBuffer
+       │          (per-vertex overlay)
+  VICSprite
+  (customize, trails)
+
+  VIWnd (UI)              Network
+  ├── VIWndGenericRenderer  ├── VITCPSocket2/VIUDPSocket
+  ├── VIWndOptions          ├── DRDP protocol
+  ├── VIWndEdit             ├── netGameStep (frame sync)
+  └── [14+ window types]    └── netRegisterMessageHandler
 ```
 
 ---
@@ -821,7 +1003,19 @@ VIAtmosphere::ProcessWeather casts VICollRay/VIEnvRay at terrain to find splash 
 VIHSprite has 101 methods managing bone animation, LOD, attachments, triggers, and blend pools. VICSprite extends with 55 more for armor customization, weapon trails, and 3D audio attenuation. Each animated character involves: bone matrix computation → LOD selection → blend matrix upload → per-attachment recursive rendering → weapon trail VFX → particle emitter updates → sound attenuation.
 
 ### 13. ast-grep works perfectly on PS2Recomp output
-`ast-grep --lang cpp --pattern '$FUNC(rdram, ctx, runtime)'` cleanly extracts all function calls from recomp files. This enables automated call graph extraction at scale across all 9,395 files.
+`ast-grep --lang cpp --pattern '$FUNC(rdram, ctx, runtime)'` cleanly extracts all function calls from recomp files. This enables automated call graph extraction at scale across all 9,395 files. Tool saved as `tools/extract-callgraph.sh`.
+
+### 14. The boot sequence defines the replacement order
+`engineInit` initializes subsystems in dependency order: memory → lists → GPU → DMA → textures → drawing → lighting → objects → input → audio → filesystem → world → scripting → particles. For native port, replace from leaves inward: GPU (paraLLEl-GS), audio (SDL_mixer), filesystem (stdio), then work toward the core.
+
+### 15. Frame loop is sequential — opportunity for threading
+`gameLoop` runs simulation (`coreGameStep` + `scriptRun`) and rendering (`gameDrawWorld`) sequentially in the same frame. Native port could decouple simulation from rendering for multi-threaded performance. The `engineFrameStart/End` boundary is clean.
+
+### 16. Networking is peer-to-peer with custom protocol
+344 networking files, a custom "DRDP" reliable protocol, RTT tracking, and frame sync barriers (`netWaitForPeersToCatchUp`). The game-level handler registration pattern (`netRegisterMessageHandler/PacketHandler`) is clean and reusable. PS2-specific parts (DNAS auth, IRX loading, `sceInetCtl`) are isolatable.
+
+### 17. UI is a retained-mode widget tree
+VIWnd forms a tree with AddChild/RemoveChild, event dispatch via OnMessage/HandleEvent, and rendering via OnDraw. VIWndGenericRenderer is data-driven using VIGUIPage/VIFlatFile. PS2-specific windows (DNAS, Station login, memory card errors) can be removed; core widget system is reusable.
 
 ---
 
