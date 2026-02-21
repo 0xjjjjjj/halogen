@@ -475,3 +475,253 @@ VIScene::Render coordinates zones, actors, sprites, shadows, deferred rendering,
 
 ### 7. Streaming is zone-based
 VIScene::Stream loads/unloads zones based on player position. Each zone has its own pre-translation, resource table, and static actor set. Zone transitions are managed by proxy actors that get replaced when the real zone loads.
+
+### 8. Engine vs Game code are two distinct layers
+The engine uses C++ OOP (`VI*` prefix, `VIVect3`, `VIMatrix44`, `VIPool`/`VIArray`). The game code uses C-style free functions (`objectFindInBox`, `worldHitscan`, `modelDraw`), `Point3`/`Matrix34` math types, and `ListHead` linked lists. This is the Slavedriver heritage — game code preserved the old patterns while the engine was rewritten for PS2.
+
+### 9. createByName is the entity factory boundary
+The 15.6 KB `createByName` function is the bridge between data-driven ESF loading and game entity instantiation. It constructs 100+ entity types via constructor calls, each parameterized by tag strings.
+
+---
+
+## 7. Asset Loading Pipeline (VILoader)
+
+### Architecture
+
+```
+VILoader
+├── VIFile[]                           ← Open resource files (CD/HDD)
+├── VIPool<VILoaderTrans>              ← Transaction pool (pending loads)
+├── VIMap<uint, int>                   ← Resource ID → transaction index
+├── VIESFParse (embedded)              ← Parser instance
+├── VIObjFile (embedded)               ← Object file reader
+└── VIArray<VIResourceElem>            ← Resource directory
+```
+
+### Async Loading Flow
+
+```
+OpenResourceFile(index, filename, VIScene)
+├── VIFile::Open(filename)
+└── VIESFParse::ParseResourceFile       ← Parse resource directory
+
+Load(fileIndex, resourceId, offset, size, flags)
+├── Find(fileIndex, resourceId)         ← Locate in resource table
+├── Align(VILoaderTrans)                ← DMA alignment!
+│   └── VIFile::AsynchAlignment         ← Async seek alignment
+└── VIPool<VILoaderTrans>::Add          ← Queue transaction
+
+Process(VIScene)                        ← Called every frame
+├── VIFile::IsAsynchComplete            ← Poll async I/O
+├── VIFile::ReadAsynch(offset, buffer, size) ← Start async read
+└── Complete(transIndex, VIScene)       ← When read finishes
+    ├── VIObjFile::OpenObject            ← Parse loaded data
+    ├── VIObjFile::FileType              ← Determine object type
+    ├── VIESFParse::Parse(VIObjFile, VIScene)    ← General parse
+    ├── VIESFParse::ParseZoneResource    ← Zone-specific parse
+    └── VIScene::ShareResource           ← Register in scene
+```
+
+**Key finding**: Loading is fully asynchronous. `ReadAsynch` starts a DMA transfer from CD/HDD, `IsAsynchComplete` polls for completion, and `Complete` parses the data into scene objects. `Align` ensures DMA-aligned file offsets (PS2 DMA requires 16-byte alignment).
+
+### Resource Management
+
+```
+Release(transIndex, VIScene)
+├── VIScene::ReleaseResource             ← Remove from scene
+├── VIMap::Erase                         ← Remove from tracking
+└── VIPool<VILoaderTrans>::Erase         ← Free transaction slot
+
+ReleaseAllComplete(VILoader, VIScene)    ← Bulk release finished loads
+```
+
+---
+
+## 8. Collision System (VICollide)
+
+### Collision Buffer Formats
+
+Three vertex buffer formats for collision geometry (matching VIRaster's rendering formats):
+
+| Format | Method | Description |
+|--------|--------|-------------|
+| PackV | `CollideBufferPackV` | Standard packed vertices |
+| PackVGF | `CollideBufferPackVGF` | Packed vertices + ground flags |
+| V | `CollideBufferV` | Raw vertex data |
+
+All collision methods follow the same pattern:
+1. `Cull(CollSphere/CollRay, BBox)` — AABB early-out
+2. `Collide(primitive, vertexIndex, normal, hitPoint)` — triangle test
+3. `PointInTriangle` — containment test via plane classification
+
+### Collision Primitives
+
+```
+VICollSphere    ← Sphere vs world/entities
+VICollRay       ← Ray cast for picking/hitscan
+VICapsule       ← Capsule for character collision (radius + half-height)
+VICylinder      ← Cylinder for volume tests
+VISphere        ← Simple sphere (bounding volume)
+VIPlane         ← Plane for classification
+VIBBox          ← Axis-aligned bounding box
+```
+
+### Per-Sprite Collision Dispatch
+
+Every sprite type implements virtual `Collide(sphere)` and `Collide(ray)`:
+
+| Sprite Type | Collision Method |
+|-------------|-----------------|
+| VIHSprite | Traverses attachment hierarchy, transforms per bone |
+| VICSprite | Uses VICapsule for character body |
+| VIGroupSprite | Composes group transform, recurses children |
+| VILODSprite | Delegates to current LOD level |
+| VIFloraSprite | Stub (no collision) |
+| VIParticleSprite | Stub (no collision) |
+| VIPointLight | Sphere collision (lights have physical volume) |
+| VINameSprite, VIPointSprite | Stub |
+
+### World Integration
+
+```
+VIZone::Collide(VISceneCollVars)
+├── SetPreTranslations(VICollide, VIVect3*)   ← Zone pre-translation
+└── BSP traversal → CollideRoom
+    ├── SetWorld(VICollide, Matrix44)          ← Room transform
+    ├── CollideActor(VIScene, ...)             ← Entity collision
+    └── CollideSprite(VIScene, ...)            ← Sprite collision
+```
+
+---
+
+## 9. AMX/Pawn Scripting VM
+
+### Standard Pawn VM (142 functions)
+
+```
+amx_Init          ← Initialize VM instance
+  └── amx_BrowseRelocate  ← Relocate code at load time
+amx_Exec          ← Execute script function
+amx_Register      ← Register native C++ functions
+amx_FindPublic    ← Look up script function by name
+amx_FindPubVar    ← Look up script variable by name
+amx_GetString     ← Get string from script memory
+amx_SetString     ← Set string in script memory
+amx_Allot         ← Allocate script memory
+amx_GetAddr       ← Get pointer into script memory
+amx_InitJIT       ← JIT compilation support!
+amx_SetDebugHook  ← Debug hook for breakpoints
+amx_SetCallback   ← Custom callback handler
+amx_RaiseError    ← Trigger script error
+amxRegisterNatives ← Register engine→script bridge
+```
+
+**Key finding**: The Pawn VM has **JIT compilation support** (`amx_InitJIT`). On PS2, this means Pawn scripts can be JIT-compiled to MIPS — significant for a native port since we'd need to either keep the MIPS JIT or recompile Pawn scripts for the target architecture.
+
+---
+
+## 10. Game Entity Layer (Engine/Game Boundary)
+
+### Two Distinct Codebases
+
+The recomp output reveals a clear boundary between engine and game code:
+
+| Aspect | Engine (VI*) | Game Code |
+|--------|-------------|-----------|
+| Language style | C++ OOP | C-style free functions |
+| Math types | VIVect3, VIMatrix44 | Point3, Matrix34 |
+| Containers | VIPool, VIArray, VIList, VIMap | ListHead linked lists |
+| Memory | VIPool allocators | blockAlloc (block allocator) |
+| Naming | PascalCase methods | camelCase free functions |
+| Prefix | VI* classes | object*, model*, world*, game* |
+
+### createByName — Entity Factory (15.6 KB)
+
+Constructs 100+ entity types from string name + position + tag parameters:
+
+**Creatures**: Player1, Orc, Goblin, Skeleton, Mummy, Soul, NPC, Cyclops, SpiderQueen, VampireLord, Innoruuk, AntQueen, Demon, Ghoul, Wraith, Vampire, CloudGiant, SeaMonster, Arenabeast, MaleDarkElf, FemaleDarkElf, WoodElfSoldier, UndeadKnight, Froglock, Mermaid, etc.
+
+**Props**: Chest, Lever, Switch, Teleporter, Torch, Candle, Gold, WeaponRack, DoorSecret, FloorSwitch, PushTrigger, MissileTrap, Catapult, Boat, Lamp, Lantern, Timer, Counter, etc.
+
+**VFX Entities**: StaticFire, WaterSpout, LavaTractor, FireBomb, HateBridge, PokeReflector, Ice, Blocker, etc.
+
+Factory pattern:
+```
+createByName(name, position, angle, tags)
+├── cvProcess(tags)                        ← Parse tag key/value pairs
+├── objectFindTagInt/String(tags, key)     ← Extract parameters
+├── lumpFindResource(name)                 ← Find model/texture
+├── new EntityType(position, angle, tags)  ← Construct
+├── hasLightOrParticle(tags)               ← Attach light/particles
+└── objectAddToSlowRunList(obj)            ← Register for updates
+```
+
+### Player::msg_run (27.5 KB — largest game function)
+
+Per-frame player update handling ALL player state:
+
+```
+Player::msg_run
+├── Movement: playerMove, playerEvadeHandler
+├── Combat: playerAttackEnemy, playerDamageHandler, playerFindTarget
+│   └── objectRadialDamage (AOE attacks)
+├── Animation: animAddOneShot, animAddTransitionTo, playerAdvanceAnimation
+├── Spells: castNewStyle, checkIfSpellIsRunning
+│   └── SpellBash, SpellShieldBash, SpellAncestralCall
+├── Items: playerItemScan, drinkPotion, playerRecomputeWeight
+├── Effects: playerDrawWeaponEffects, playerProcessEffectTimers
+│   └── P_AddParticle, LightEffect, UnholyAura, GroundPoundEffect
+├── UI: hudSetInfoMessage, hudGetFadeIconPos
+├── Network: netPlayerIsConnected, netPlayerIsLocal
+├── Input: padGetAnalogButton, padBigRumble
+└── Idle: playerPlayRandomIdle
+```
+
+### Creature Base Class (77 methods)
+
+```
+Creature (inherits Base → GameObject)
+├── AI: enemyInZone, alternateEnemyInZone, flee2, findClearPath
+│   └── getSmartRandomDestination, wallAndObjectSteering
+├── Pathfinding: plotRoute, getCurrentRoutePoint, getNextRoutePoint
+├── Movement: move, move2 (with world collision + water checks)
+├── Combat: death, dropTreasure, creatureSlamEffect
+├── Status: charm, confuse
+├── Drawing: draw (modelDraw + shadows + glow effects + lighting)
+├── Animation: creatureAdvanceAnimation, everyFrame
+├── Events: msg_hurt, msg_alert, msg_collision, msg_collisionWorld
+├── World: worldHitscan, worldFindStandHeight, worldCheckForWater
+└── Clone: clone (for multiplayer entity duplication)
+```
+
+### Low-Level Data Structures (Game Layer)
+
+The game layer uses underscore-prefixed structs for raw binary data:
+
+| Struct | Purpose |
+|--------|---------|
+| `_modelHeader` | Model binary data (vertices, bones, animations) |
+| `_worldHeader` | World geometry (BSP, floors, water) |
+| `_texture` | Texture data (raw pixel data) |
+| `_vagHeader` | Sony VAG audio format header |
+| `_drawRecord` | Draw call record for batching |
+| `AnimationState` | Current animation blend state |
+| `AnimationHeader` | Animation clip data |
+
+### World Interaction Functions (C-style API)
+
+```
+worldHitscan(worldHeader, start, end, flags, ...)
+worldFindStandHeight(worldHeader, position, radius)
+worldCheckForWater(worldHeader, position, radius, &waterHeight)
+worldPerturbWater(worldHeader, position, radius, amplitude)
+modelDraw(modelHeader, texture, flags, position, matrix, animState, ...)
+modelDrawShadow(modelHeader, flags, matrix, animState, castShadow)
+modelGetBoundingBox(modelHeader, ...)
+modelGetShadowPos(modelHeader, animState, position, ...)
+objectFindInBox(min, max, results, maxResults)
+objectMoveWithWorldCollision(position, delta, radius, ...)
+objectUpdateInGrid(gameObject)
+```
+
+These are the **direct descendants of Slavedriver's free functions** — same patterns (`HITSCAN.C` → `worldHitscan`, `OBJECT.C` → `objectFindInBox`, etc.).
