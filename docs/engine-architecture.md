@@ -4,7 +4,7 @@ Generated from ELF symbol table analysis of Champions of Norrath (SLUS-20565).
 
 **14,370 functions | 660 classes | ~3.9 MB code**
 
-*Classification accuracy: 57.5% classified, 42.5% unclassified (improved from 50.4% initial)*
+*Classification accuracy: 59.2% classified, 40.8% unclassified (improved from 50.4% initial through template mangling, word-boundary matching, expanded entity/VFX classification, and infrastructure reclassification)*
 
 ## Engine Overview
 
@@ -204,7 +204,7 @@ Visual effects:
 
 1. **VIRaster is the heart** — 168 methods, manages all GS interaction. BeginScene/EndScene, DMA submission, scissoring, double-buffering.
 
-2. **The "Other" bucket** — 6,112 functions (42.5%) remain unclassified. Reduced from 49.6% via template mangling support, expanded entity/skill/spell classification, and word-boundary keyword matching. Remaining "Other" is mostly free functions, libxml2, and game logic not attached to named classes. Further reduction requires Ghidra analysis.
+2. **The "Other" bucket** — 5,856 functions (40.8%) remain unclassified. Reduced from 49.6% via template mangling support, expanded entity/VFX/skill/spell classification, infrastructure reclassification (STL, RTTI, compression, multiplayer), and word-boundary keyword matching. Remaining "Other" is mostly free functions, libxml2, and game logic not attached to named classes. Further reduction requires Ghidra analysis.
 
 3. **Sprite hierarchy = entity system** — Everything renderable inherits from VISprite. This is the entity-component pattern of its era.
 
@@ -233,3 +233,18 @@ C++/Sony Runtime:                           316.4 KB           ← RUNTIME (not 
 ```
 
 Graphics subsystem (renderer + particles + lighting + DMA) makes up ~23% of engine code — the primary target for native port optimization.
+
+## Slavedriver Engine Heritage
+
+The Snowblind Engine evolved directly from Lobotomy Software's Slavedriver engine (Sega Saturn, 1997). Both created by Ezra Dreisbach. Slavedriver source was open-sourced under GPLv3 in August 2025 at `github.com/Lobotomy-Software/SlaveDriver-Engine`.
+
+Key patterns preserved across the ~4 year evolution:
+- **Message-passing entity system**: Slavedriver's `messHandler` function pointer → Snowblind's virtual `msg_run`/`msg_draw` methods
+- **Object hierarchy**: `Object` → `SpriteObject` → `MonsterObject` became `Base` → `Creature` → `Player`
+- **Sprite-attached dynamic lights**: `addLight(Sprite*, r, g, b)` → `VIPointLight` — explains cave performance issues
+- **Water vertex simulation**: `WaveVert` spring-connected mesh → VU1 microcode deformation
+- **Sector-based world**: `sSectorType` with walls/floors → `VIZone` streaming architecture
+- **Entity factory**: Explicit `construct*()` functions → `createByName` (15.6 KB factory)
+- **Pathfinding**: 118-line sector adjacency `ROUTE.C` → 19.8 KB `routePlot` A* pathfinder
+
+See `docs/slavedriver-comparison.md` for detailed subsystem mapping.

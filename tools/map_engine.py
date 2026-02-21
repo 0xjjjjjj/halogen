@@ -219,7 +219,7 @@ def classify_subsystem(cls: str | None, method: str, name: str) -> str:
     if c == "vehicle":
         return "Physics"
 
-    # Entity/Game — monsters, NPCs, items, props
+    # Entity/Game — monsters, NPCs, items, props, VFX entities
     if c in ("creature", "orc", "goblin", "skeleton", "mummy", "soul",
              "player", "npc", "item", "base", "critter",
              "woodelfsoldier", "cyclops", "spiderqueen", "antqueen",
@@ -230,7 +230,17 @@ def classify_subsystem(cls: str | None, method: str, name: str) -> str:
              "cthulu", "nightmare", "firebeetle", "firefly", "mermaid",
              "gnome", "gnomenavigator", "maledarkelfelfsoldier",
              "maledarkelf", "femaledarkelfsoldier", "femaledarkelf",
-             "cat", "shooter", "rondo"):
+             "cat", "shooter", "rondo",
+             # VFX entities (msg_run/msg_draw pattern)
+             "oniball", "autoobject", "fireeffect", "ice", "lostsoul",
+             "unholyaura", "glowingcylinder", "recalleffect",
+             "snowballspell", "icechunk", "pokereflector", "firetrail",
+             "firetrailmaker", "weather", "hatebridge", "groundpoundeffect",
+             "hammerofwrath", "blindinglighteffect", "froststormiceshard",
+             "froststormicechunk", "looseicechunk", "diseasetrail",
+             "diseasecorpse", "hatebeam", "hatesoul", "mummysnake",
+             "boltgoround", "firestorm", "poisonrain", "phice",
+             "blocker", "fxcreaturestate"):
         return "Game Entities"
 
     # Skills (Skill* classes)
@@ -249,7 +259,7 @@ def classify_subsystem(cls: str | None, method: str, name: str) -> str:
              "cosmeticpropanim", "userparamprop", "pushphysicsprop",
              "particleprop", "weaponrack", "boat", "skulboat", "wheel",
              "clock", "candle", "candle2", "gold", "fire", "loosefire",
-             "trap", "missiletrap", "webtrap"):
+             "trap", "missiletrap", "webtrap", "timer", "line"):
         return "Game Props"
 
     # Projectiles/effects
@@ -264,12 +274,48 @@ def classify_subsystem(cls: str | None, method: str, name: str) -> str:
     if n.startswith("sce") or n.startswith("_sce"):
         return "Sony SDK"
 
-    # C++ stdlib
+    # C++ stdlib (including STL internals)
     if c in ("istream", "ostream", "streambuf", "filebuf", "ios",
-             "string", "basic_string"):
+             "string", "basic_string", "_rb_tree", "deque",
+             "_deque_base", "stdiobuf", "streammarker",
+             "ostdiostream", "istdiostream"):
         return "C++ Stdlib"
+    if c.startswith("__default_alloc") or c.startswith("__malloc_alloc"):
+        return "C++ Stdlib"
+
+    # GCC RTTI infrastructure
+    if c.endswith("_type_info"):
+        return "C++ Runtime"
     if n.startswith("__") and not n.startswith("__Q"):
         return "C++ Runtime"
+
+    # Base:: engine utilities
+    if c.startswith("base::") or c == "blockallocator":
+        return "Engine Utilities"
+
+    # Unicode / localization
+    if c.startswith("plat_unicode"):
+        return "String Utils"
+
+    # Encryption / network security
+    if c in ("encryptor",):
+        return "Networking"
+
+    # Multiplayer game instances
+    if c in ("mgglobals", "mginst") or c.startswith("mginst::"):
+        return "Networking"
+
+    # GenericAPI (HTTP/TCP dispatcher)
+    if c.startswith("genericapi::"):
+        return "Networking"
+
+    # Compression (asset/save file)
+    if c in ("ccompress", "cdecompress"):
+        return "File I/O"
+
+    # Minimap
+    if c == "map" and any(x in n for x in ("worldtomap", "revealmap", "writemap", "readmap", "drawmap")):
+        return "UI"
 
     # Math
     if any(x in n for x in ("matrix", "vector", "quat", "point3", "vect")):

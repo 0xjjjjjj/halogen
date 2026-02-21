@@ -1,0 +1,109 @@
+name: reverse-engineering
+role: expert game engine reverse engineer extracting technical details from developer presentations, interviews, and gameplay analysis videos.
+categories:
+  - rendering_technique
+  - memory_architecture
+  - asset_pipeline
+  - optimization_strategy
+  - hardware_usage
+  - engine_structure
+  - tooling
+  - performance_bottleneck
+
+weights:
+  relevance: 0.40
+  specificity: 0.30
+  actionability: 0.20
+  confidence: 0.10
+
+extraction_prompt: |
+  <role>
+  You are an expert game engine reverse engineer analyzing video transcripts for technical details about the Snowblind Engine (PS2). This engine powered Baldur's Gate: Dark Alliance, Champions of Norrath, and related titles.
+  </role>
+
+  <task>
+  Extract ALL technical details, engine architecture information, rendering techniques, optimization strategies, and hardware usage patterns from this transcript chunk.
+  </task>
+
+  <output_schema>
+  {{
+    "findings": [
+      {{
+        "description": "string - clear technical finding in 1-2 sentences",
+        "context": "string - direct quote or paraphrase, max 100 words",
+        "category": "rendering_technique | memory_architecture | asset_pipeline | optimization_strategy | hardware_usage | engine_structure | tooling | performance_bottleneck",
+        "confidence": "number 0.0-1.0",
+        "relevance_to_snowblind": "string - how this relates to the Snowblind Engine specifically"
+      }}
+    ]
+  }}
+  </output_schema>
+
+  <context>
+  Known Snowblind Engine details to watch for:
+  - VI* class prefix convention (VIRaster, VIScene, VIHSprite, etc.)
+  - Render-to-texture (RTT) for dynamic lighting/shadows
+  - AMX/Pawn scripting VM for gameplay logic
+  - ESF asset format
+  - VU1 microcode for geometry processing
+  - SOE RealmService networking
+  - Zone/world streaming architecture
+  - Particle system causing cave performance issues
+  - Dynamic lighting with point lights
+  </context>
+
+  <instructions>
+  1. Read the transcript carefully for ANY technical detail
+  2. Prioritize: rendering pipeline, memory management, asset loading, GPU usage
+  3. Note both explicit statements and implied technical decisions
+  4. Flag anything that contradicts or confirms known Snowblind Engine behavior
+  5. Output valid JSON only, no markdown or explanation
+  </instructions>
+
+  <transcript>
+  {chunk}
+  </transcript>
+
+validation_prompt: |
+  <role>
+  You are a panel of experts validating reverse engineering findings about the Snowblind Engine.
+  </role>
+
+  <task>
+  Review these extracted technical findings. For each:
+  1. Rate confidence (0.0-1.0) based on evidence strength
+  2. Flag any that are speculative vs confirmed
+  3. Identify contradictions between findings
+  4. Remove duplicates, keeping the most specific version
+  </task>
+
+  <findings>
+  {ideas_json}
+  </findings>
+
+  Output the validated findings as JSON with the same schema, updated confidence scores, and a "validation_notes" field added to each.
+
+batch_reduce_prompt: |
+  <task>
+  Merge these technical findings about the Snowblind Engine into a deduplicated list.
+  Combine related findings. Keep the most specific version of duplicates.
+  Group by category. Output JSON array of findings.
+  </task>
+
+  {batch_json}
+
+final_reduce_prompt: |
+  <task>
+  Create a final technical report from these Snowblind Engine findings.
+
+  Structure as:
+  1. Confirmed facts (high confidence)
+  2. Likely patterns (medium confidence)
+  3. Speculative observations (low confidence)
+  4. Contradictions or open questions
+
+  For each finding, note the source context.
+  Output as structured JSON.
+  </task>
+
+  {batch_json}

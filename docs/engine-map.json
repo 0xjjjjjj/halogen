@@ -9624,7 +9624,7 @@
     "_Rb_tree": {
       "method_count": 38,
       "total_size": 21164,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "lower_bound",
@@ -14042,7 +14042,7 @@
     "Base::MD5": {
       "method_count": 21,
       "total_size": 13548,
-      "subsystem": "Other",
+      "subsystem": "Engine Utilities",
       "methods": [
         {
           "name": "HH",
@@ -18931,7 +18931,7 @@
     "map": {
       "method_count": 11,
       "total_size": 8512,
-      "subsystem": "Other",
+      "subsystem": "UI",
       "methods": [
         {
           "name": "worldToMap",
@@ -18993,7 +18993,7 @@
     "stdiobuf": {
       "method_count": 11,
       "total_size": 1052,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "~destructor",
@@ -23833,7 +23833,7 @@
     "Plat_Unicode": {
       "method_count": 9,
       "total_size": 6408,
-      "subsystem": "Other",
+      "subsystem": "String Utils",
       "methods": [
         {
           "name": "toLower",
@@ -23885,7 +23885,7 @@
     "Encryptor": {
       "method_count": 9,
       "total_size": 2892,
-      "subsystem": "Other",
+      "subsystem": "Networking",
       "methods": [
         {
           "name": "generateSymmetricKey",
@@ -25249,7 +25249,7 @@
     "__user_type_info": {
       "method_count": 8,
       "total_size": 272,
-      "subsystem": "Other",
+      "subsystem": "C++ Runtime",
       "methods": [
         {
           "name": "contained_p",
@@ -26424,7 +26424,7 @@
     "AutoObject": {
       "method_count": 8,
       "total_size": 2684,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_save",
@@ -26911,7 +26911,7 @@
     "OniBall": {
       "method_count": 7,
       "total_size": 2900,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -27877,7 +27877,7 @@
     "FireEffect": {
       "method_count": 7,
       "total_size": 1296,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -28255,7 +28255,7 @@
     "Plat_Unicode::CharDataMap": {
       "method_count": 7,
       "total_size": 4176,
-      "subsystem": "Other",
+      "subsystem": "String Utils",
       "methods": [
         {
           "name": "clearBlocks",
@@ -28922,7 +28922,7 @@
     "Ice": {
       "method_count": 6,
       "total_size": 1856,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -29107,7 +29107,7 @@
     "Timer": {
       "method_count": 6,
       "total_size": 696,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "msg_trigger",
@@ -29403,7 +29403,7 @@
     "GenericAPI::GenericAPICore": {
       "method_count": 6,
       "total_size": 2576,
-      "subsystem": "Other",
+      "subsystem": "Networking",
       "methods": [
         {
           "name": "changeHostPort",
@@ -29440,7 +29440,7 @@
     "MGGlobals": {
       "method_count": 6,
       "total_size": 984,
-      "subsystem": "Other",
+      "subsystem": "Networking",
       "methods": [
         {
           "name": "activate",
@@ -29773,7 +29773,7 @@
     "streammarker": {
       "method_count": 6,
       "total_size": 160,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "~destructor",
@@ -29810,7 +29810,7 @@
     "LostSoul": {
       "method_count": 6,
       "total_size": 2068,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -29921,7 +29921,7 @@
     "UnholyAura": {
       "method_count": 6,
       "total_size": 2516,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -29995,7 +29995,7 @@
     "RecallEffect": {
       "method_count": 6,
       "total_size": 684,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -30069,7 +30069,7 @@
     "GlowingCylinder": {
       "method_count": 6,
       "total_size": 2132,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -30291,7 +30291,7 @@
     "SnowballSpell": {
       "method_count": 6,
       "total_size": 2176,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -30587,7 +30587,7 @@
     "IceChunk": {
       "method_count": 6,
       "total_size": 896,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -30624,7 +30624,7 @@
     "PokeReflector": {
       "method_count": 6,
       "total_size": 868,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_poke",
@@ -30661,7 +30661,7 @@
     "FireTrail": {
       "method_count": 6,
       "total_size": 1908,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -30772,7 +30772,7 @@
     "Weather": {
       "method_count": 5,
       "total_size": 568,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -30804,7 +30804,7 @@
     "HateBridge": {
       "method_count": 5,
       "total_size": 680,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "setPassableState",
@@ -30836,7 +30836,7 @@
     "GroundPoundEffect": {
       "method_count": 5,
       "total_size": 4272,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -30868,7 +30868,7 @@
     "FireTrailMaker": {
       "method_count": 5,
       "total_size": 2168,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -30900,7 +30900,7 @@
     "ostdiostream": {
       "method_count": 5,
       "total_size": 840,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "~destructor",
@@ -31380,7 +31380,7 @@
     "MGInst": {
       "method_count": 5,
       "total_size": 3028,
-      "subsystem": "Other",
+      "subsystem": "Networking",
       "methods": [
         {
           "name": "destroy",
@@ -31508,7 +31508,7 @@
     "HammerOfWrath": {
       "method_count": 5,
       "total_size": 6816,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -31636,7 +31636,7 @@
     "BlockAllocator": {
       "method_count": 5,
       "total_size": 628,
-      "subsystem": "Other",
+      "subsystem": "Engine Utilities",
       "methods": [
         {
           "name": "realloc",
@@ -31668,7 +31668,7 @@
     "Base::CConfig": {
       "method_count": 5,
       "total_size": 1544,
-      "subsystem": "Other",
+      "subsystem": "Engine Utilities",
       "methods": [
         {
           "name": "GetString",
@@ -31732,7 +31732,7 @@
     "istdiostream": {
       "method_count": 5,
       "total_size": 848,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "buffered",
@@ -31764,7 +31764,7 @@
     "Base::ByteStream": {
       "method_count": 5,
       "total_size": 1320,
-      "subsystem": "Other",
+      "subsystem": "Engine Utilities",
       "methods": [
         {
           "name": "reAllocate",
@@ -31988,7 +31988,7 @@
     "PhIce": {
       "method_count": 5,
       "total_size": 2016,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -32148,7 +32148,7 @@
     "FrostStormIceShard": {
       "method_count": 5,
       "total_size": 2160,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -32244,7 +32244,7 @@
     "DiseaseTrail": {
       "method_count": 4,
       "total_size": 3172,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -32325,7 +32325,7 @@
     "LooseIceChunk": {
       "method_count": 4,
       "total_size": 1392,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -32406,7 +32406,7 @@
     "MummySnake": {
       "method_count": 4,
       "total_size": 1856,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -32433,7 +32433,7 @@
     "BoltGoRound": {
       "method_count": 4,
       "total_size": 1756,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -32946,7 +32946,7 @@
     "HateBeam": {
       "method_count": 4,
       "total_size": 3240,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -33189,7 +33189,7 @@
     "FireStorm": {
       "method_count": 4,
       "total_size": 3300,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -33351,7 +33351,7 @@
     "HateSoul": {
       "method_count": 4,
       "total_size": 1700,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -33513,7 +33513,7 @@
     "PoisonRain": {
       "method_count": 4,
       "total_size": 2596,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -33594,7 +33594,7 @@
     "DiseaseCorpse": {
       "method_count": 4,
       "total_size": 736,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -33621,7 +33621,7 @@
     "Blocker": {
       "method_count": 4,
       "total_size": 768,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -33675,7 +33675,7 @@
     "FrostStormIceChunk": {
       "method_count": 4,
       "total_size": 1392,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "clone",
@@ -33702,7 +33702,7 @@
     "Line": {
       "method_count": 4,
       "total_size": 2588,
-      "subsystem": "Other",
+      "subsystem": "Game Props",
       "methods": [
         {
           "name": "~destructor",
@@ -33783,7 +33783,7 @@
     "BlindingLightEffect": {
       "method_count": 4,
       "total_size": 1532,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "msg_run",
@@ -34401,7 +34401,7 @@
     "__class_type_info": {
       "method_count": 3,
       "total_size": 208,
-      "subsystem": "Other",
+      "subsystem": "C++ Runtime",
       "methods": [
         {
           "name": "~destructor",
@@ -34533,7 +34533,7 @@
     "__si_type_info": {
       "method_count": 3,
       "total_size": 204,
-      "subsystem": "Other",
+      "subsystem": "C++ Runtime",
       "methods": [
         {
           "name": "~destructor",
@@ -34577,7 +34577,7 @@
     "_Deque_base": {
       "method_count": 3,
       "total_size": 736,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "_M_create_nodes",
@@ -34753,7 +34753,7 @@
     "deque": {
       "method_count": 3,
       "total_size": 1072,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "_M_pop_front_aux",
@@ -34968,7 +34968,7 @@
     "__default_alloc_template": {
       "method_count": 2,
       "total_size": 592,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "_S_refill",
@@ -35036,7 +35036,7 @@
     "__func_type_info": {
       "method_count": 2,
       "total_size": 180,
-      "subsystem": "Other",
+      "subsystem": "C++ Runtime",
       "methods": [
         {
           "name": "~destructor",
@@ -35087,7 +35087,7 @@
     "Plat_Unicode::Blocks::Mapping": {
       "method_count": 2,
       "total_size": 720,
-      "subsystem": "Other",
+      "subsystem": "String Utils",
       "methods": [
         {
           "name": "explicitDestroy",
@@ -35138,7 +35138,7 @@
     "__builtin_type_info": {
       "method_count": 2,
       "total_size": 180,
-      "subsystem": "Other",
+      "subsystem": "C++ Runtime",
       "methods": [
         {
           "name": "~destructor",
@@ -35172,7 +35172,7 @@
     "Base::AutoByteStream": {
       "method_count": 2,
       "total_size": 248,
-      "subsystem": "Other",
+      "subsystem": "Engine Utilities",
       "methods": [
         {
           "name": "unpack",
@@ -35189,7 +35189,7 @@
     "Base::BlockAllocator": {
       "method_count": 2,
       "total_size": 288,
-      "subsystem": "Other",
+      "subsystem": "Engine Utilities",
       "methods": [
         {
           "name": "returnBlock",
@@ -35325,7 +35325,7 @@
     "Base::CStatisticTimer": {
       "method_count": 2,
       "total_size": 260,
-      "subsystem": "Other",
+      "subsystem": "Engine Utilities",
       "methods": [
         {
           "name": "GetFraction",
@@ -35529,7 +35529,7 @@
     "__pointer_type_info": {
       "method_count": 2,
       "total_size": 180,
-      "subsystem": "Other",
+      "subsystem": "C++ Runtime",
       "methods": [
         {
           "name": "~destructor",
@@ -35546,7 +35546,7 @@
     "MGInst::Exits": {
       "method_count": 2,
       "total_size": 584,
-      "subsystem": "Other",
+      "subsystem": "Networking",
       "methods": [
         {
           "name": "pickRandom",
@@ -35580,7 +35580,7 @@
     "__ptmf_type_info": {
       "method_count": 2,
       "total_size": 180,
-      "subsystem": "Other",
+      "subsystem": "C++ Runtime",
       "methods": [
         {
           "name": "~destructor",
@@ -35768,7 +35768,7 @@
     "FxCreatureState": {
       "method_count": 1,
       "total_size": 44,
-      "subsystem": "Other",
+      "subsystem": "Game Entities",
       "methods": [
         {
           "name": "~destructor",
@@ -35780,7 +35780,7 @@
     "__malloc_alloc_template": {
       "method_count": 1,
       "total_size": 148,
-      "subsystem": "Other",
+      "subsystem": "C++ Stdlib",
       "methods": [
         {
           "name": "_S_oom_malloc",
@@ -36428,7 +36428,7 @@
     "Plat_Unicode::Blocks::Data": {
       "method_count": 1,
       "total_size": 1516,
-      "subsystem": "Other",
+      "subsystem": "String Utils",
       "methods": [
         {
           "name": "addRangeGroup",
@@ -36812,7 +36812,7 @@
     "CCompress": {
       "method_count": 1,
       "total_size": 1228,
-      "subsystem": "Other",
+      "subsystem": "File I/O",
       "methods": [
         {
           "name": "analCompress",
@@ -36836,7 +36836,7 @@
     "CDecompress": {
       "method_count": 1,
       "total_size": 1100,
-      "subsystem": "Other",
+      "subsystem": "File I/O",
       "methods": [
         {
           "name": "analDecompress",
@@ -36860,24 +36860,24 @@
   },
   "subsystems": {
     "Other": {
-      "function_count": 6112,
-      "total_size": 1891760
+      "function_count": 5856,
+      "total_size": 1787348
     },
     "Game Entities": {
-      "function_count": 543,
-      "total_size": 444840
-    },
-    "C++ Runtime": {
-      "function_count": 696,
-      "total_size": 203304
+      "function_count": 687,
+      "total_size": 503708
     },
     "Networking": {
-      "function_count": 891,
-      "total_size": 197980
+      "function_count": 922,
+      "total_size": 208464
+    },
+    "C++ Runtime": {
+      "function_count": 638,
+      "total_size": 185852
     },
     "Math": {
-      "function_count": 303,
-      "total_size": 176620
+      "function_count": 294,
+      "total_size": 165712
     },
     "Renderer": {
       "function_count": 370,
@@ -36892,8 +36892,8 @@
       "total_size": 88876
     },
     "Game Props": {
-      "function_count": 261,
-      "total_size": 78140
+      "function_count": 271,
+      "total_size": 81424
     },
     "Physics": {
       "function_count": 144,
@@ -36911,6 +36911,10 @@
       "function_count": 87,
       "total_size": 52192
     },
+    "C++ Stdlib": {
+      "function_count": 307,
+      "total_size": 47296
+    },
     "Scene": {
       "function_count": 140,
       "total_size": 45120
@@ -36924,8 +36928,8 @@
       "total_size": 41012
     },
     "UI": {
-      "function_count": 97,
-      "total_size": 29496
+      "function_count": 100,
+      "total_size": 30336
     },
     "AMX Scripting": {
       "function_count": 144,
@@ -36959,10 +36963,6 @@
       "function_count": 39,
       "total_size": 21100
     },
-    "C++ Stdlib": {
-      "function_count": 233,
-      "total_size": 20684
-    },
     "Sprites": {
       "function_count": 76,
       "total_size": 19544
@@ -36982,6 +36982,14 @@
     "DMA/GIF Pipeline": {
       "function_count": 103,
       "total_size": 18960
+    },
+    "String Utils": {
+      "function_count": 65,
+      "total_size": 17744
+    },
+    "Engine Utilities": {
+      "function_count": 40,
+      "total_size": 17536
     },
     "World": {
       "function_count": 39,
@@ -37023,6 +37031,10 @@
       "function_count": 59,
       "total_size": 10504
     },
+    "File I/O": {
+      "function_count": 39,
+      "total_size": 9852
+    },
     "Engine (VIWndOptions)": {
       "function_count": 20,
       "total_size": 9816
@@ -37042,10 +37054,6 @@
     "Engine (VIEESurfCache)": {
       "function_count": 19,
       "total_size": 7528
-    },
-    "File I/O": {
-      "function_count": 37,
-      "total_size": 7524
     },
     "Engine (VIPrimBuffer)": {
       "function_count": 27,
@@ -37081,10 +37089,6 @@
     },
     "Engine (VIGUIPage)": {
       "function_count": 27,
-      "total_size": 4924
-    },
-    "String Utils": {
-      "function_count": 46,
       "total_size": 4924
     },
     "Engine (VIWndSplash)": {
