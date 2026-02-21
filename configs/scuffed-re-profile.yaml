@@ -27,7 +27,7 @@ extraction_prompt: |
 
   <output_schema>
   {{
-    "findings": [
+    "ideas": [
       {{
         "description": "string - clear technical finding in 1-2 sentences",
         "context": "string - direct quote or paraphrase, max 100 words",
@@ -61,7 +61,7 @@ extraction_prompt: |
   </instructions>
 
   <transcript>
-  {chunk}
+  {chunk_text}
   </transcript>
 
 validation_prompt: |
@@ -85,25 +85,41 @@ validation_prompt: |
 
 batch_reduce_prompt: |
   <task>
-  Merge these technical findings about the Snowblind Engine into a deduplicated list.
+  Merge and deduplicate these {count} technical findings about the Snowblind Engine.
   Combine related findings. Keep the most specific version of duplicates.
-  Group by category. Output JSON array of findings.
+  Group by category.
+
+  Output a JSON object with an "ideas" array. Each item must have:
+  - description: clear technical finding
+  - context: source quote or paraphrase
+  - category: one of the defined categories
+  - confidence: 0.0-1.0
+  - relevance: 0-100 (how relevant to Snowblind Engine)
+  - specificity: 0-100 (how specific/detailed the finding is)
+  - actionability: 0-100 (how useful for reverse engineering)
+  - frequency: number of times this appeared
+  - total_score: weighted score (relevance*0.4 + specificity*0.3 + actionability*0.2 + confidence*10)
+  - source_chunks: list of chunk IDs
+  - merged_from: list of merged descriptions
   </task>
 
-  {batch_json}
+  {ideas_json}
 
 final_reduce_prompt: |
   <task>
-  Create a final technical report from these Snowblind Engine findings.
+  Create a final ranked list from these {count} Snowblind Engine findings.
 
-  Structure as:
-  1. Confirmed facts (high confidence)
-  2. Likely patterns (medium confidence)
-  3. Speculative observations (low confidence)
-  4. Contradictions or open questions
+  Score each finding:
+  - relevance: 0-100 (how relevant to Snowblind Engine)
+  - specificity: 0-100 (how specific/detailed)
+  - actionability: 0-100 (how useful for reverse engineering)
+  - frequency: total count
+  - total_score: weighted score (relevance*0.4 + specificity*0.3 + actionability*0.2 + confidence*10)
+  - source_chunks: all chunk IDs
+  - merged_from: all merged descriptions
 
-  For each finding, note the source context.
-  Output as structured JSON.
+  Output top 25 as JSON object with "ideas" array, sorted by total_score descending.
+  Each item must include: description, context, category, confidence, relevance, specificity, actionability, frequency, total_score, source_chunks, merged_from.
   </task>
 
-  {batch_json}
+  {ideas_json}
