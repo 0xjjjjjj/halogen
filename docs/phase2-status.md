@@ -1,6 +1,6 @@
-# Phase 2 Status — Ghidra Batch Decompilation Complete
+# Phase 2 Status — Static Analysis Complete, Types Applied
 
-As of 2026-02-21. All 6,446 functions batch-decompiled via Ghidra headless mode (tools/ghidra-batch-decompile.py). 42 rendering functions manually analyzed in docs/render-pipeline.md (1,492 lines). Full decompiled output in output/decompiled/ (30MB, 6,447 .c files).
+As of 2026-02-21. All 6,446 functions batch-decompiled via Ghidra headless mode. 34 struct types applied from Demon Stone DWARF1 debug info, 700 function `this` pointers retyped — producing 2,276 named struct member accesses in decompiled output. 42 rendering functions manually analyzed in docs/render-pipeline.md (1,492 lines).
 
 ## What We Know
 
@@ -111,15 +111,13 @@ The "VU1 microcode gap" from Phase 1 was based on `.vudata`/`.vubss` being zeroe
 **Output**: `output/decompiled/` (6,447 .c files, 30MB) + `output/decompiled/all_decompiled.txt` (12MB combined)
 **Tools**: `tools/ghidra-batch-decompile.py`, `tools/run-batch-decompile.bat`
 
-#### 2. Cl* → VI* Type Mapping Script
-**Why**: We have 1,211 struct layouts from Demon Stone and 4,701 function names from CoN. Matching them automates type annotation.
+#### 2. Cl* → VI* Type Mapping — COMPLETE
+34 VI* classes mapped to Demon Stone Cl* equivalents. 942 named struct members from DWARF1 debug info. 700 function `this` pointers retyped via decompiler-assisted param discovery. Batch re-decompilation produces **2,276 named struct member accesses** (e.g. `this->mWalkableHeading` instead of `*(float *)(param_1 + 0xe0)`).
 
-**Concrete steps**:
-- Write a script to map Demon Stone `Cl*` class names to CoN `VI*` equivalents
-- Match function parameters/return types to CoN function signatures
-- Generate Ghidra type import scripts (.gdt or .h files)
+Best coverage: VIHSprite 67%, VIZone 65%, VIPointLight 56%, VICollide 54%, VIWnd 100%.
 
-**Effort**: Half day
+**Output**: `output/type-mapping.json`, `output/snowblind-types.h` (1,023 lines), `output/offset-xref.md` (2,091 lines)
+**Tools**: `tools/map-types.py`, `tools/ghidra-apply-types.py`, `tools/ghidra-retype-params.py`
 
 #### 3. PCSX2 Runtime Tracing
 **Why**: VU1 microcode and GS register writes are invisible to static analysis. Need to see what actually happens at runtime.
@@ -208,3 +206,6 @@ The "VU1 microcode gap" from Phase 1 was based on `.vudata`/`.vubss` being zeroe
 | `docs/demon-stone-class-members.md` | All class members from symbol mangling (6,041 members) |
 | `docs/demon-stone-types.json` | Deduplicated struct layouts with byte offsets (1,211 types) |
 | `docs/TOOLCHAIN.md` | Environment setup guide |
+| `output/type-mapping.json` | Cross-referenced Cl*→VI* type mapping (34 classes, 942 members) |
+| `output/snowblind-types.h` | Ghidra-importable C header (1,023 lines) |
+| `output/offset-xref.md` | Decompiled offset vs struct member cross-reference (2,091 lines) |
