@@ -131,29 +131,84 @@ Reference: [ps2tek GS documentation](https://psi-rockin.github.io/ps2tek/)
 
 ---
 
-## 4. Python Analysis Stack (future — Phase 1.5+)
+## 4. PCSX2 (Runtime Tracing)
 
-When we have the binary, we'll build Python scripts for:
+PCSX2 for GS dump capture and runtime analysis. Installed as portable (no installer).
 
-```bash
-# Install analysis libs
-pip install lief capstone construct pyelftools
+### Setup (Windows — sleeper5)
 
-# lief      - ELF parsing, section analysis
-# capstone  - MIPS R5900 disassembly
-# construct - Binary format parsing (GIF tags, VIF packets)
-# pyelftools - ELF utilities
+```
+# Already installed at C:\pcsx2\pcsx2-qt.exe (v2.7.136 nightly)
+# Portable .7z extract, no registry changes
 ```
 
-Planned scripts in `tools/`:
-- `elf_info.py` — ELF sections, symbols, entry point
-- `sym_dump.py` — Extract .mdebug symbols
-- `vu_extract.py` — Extract .vudata VU1 programs
+### Configuration
+
+1. First launch: Settings → BIOS → point to your PS2 BIOS folder
+2. Settings → Game List → add folder containing `Champions of Norrath (USA).iso`
+3. Boot the game, verify it reaches in-game
+
+### GS Dump Capture
+
+1. Navigate to target scene in-game
+2. Press **Shift+F8** to capture single-frame GS dump
+3. Dumps land in `C:\pcsx2\snaps\` as `.gs` + `.png` files
+4. Copy dumps to local machine for analysis
+
+Two scenes needed:
+- **Cave with torches** — bottleneck case (VIPointLight overdraw, VIColorBuffer passes)
+- **Outdoor/town** — normal rendering (VIAtmosphere, VIWorld streaming)
+
+### GS Dump Analysis
+
+```bash
+# Human-readable report
+python3 tools/parse-gs-dump.py dump.gs
+
+# JSON output
+python3 tools/parse-gs-dump.py dump.gs --json
+
+# Verbose (every GIFTag)
+python3 tools/parse-gs-dump.py dump.gs -v
+
+# Generate synthetic test dump
+python3 tools/parse-gs-dump.py --create-test-dump test.gs
+```
+
+Output includes: draw call count, primitive type histogram, GS register write frequency, per-path transfer sizes, texture upload stats.
+
+### VU1 Microcode Extraction
+
+```bash
+# Extract VU1 programs from ELF DVP overlay sections
+python3 tools/extract-vu1.py bin/SLUS_205.65
+
+# Verbose (hex instruction listing)
+python3 tools/extract-vu1.py bin/SLUS_205.65 -v
+
+# Custom output directory
+python3 tools/extract-vu1.py bin/SLUS_205.65 -o output/vu1
+```
+
+Extracts 2 VU1 programs (RasterMicro + BillboardMicro) from 18 DVP overlay sections. Output to `output/vu1/` with raw binaries, assembled programs, and analysis.
+
+---
+
+## 5. Python Analysis Stack
+
+Scripts in `tools/`:
+- `parse-gs-dump.py` — PCSX2 GS dump parser (draw calls, primitives, register writes)
+- `extract-vu1.py` — VU1 microcode extraction from ELF DVP overlay sections
+- `parse-dwarf1-types.py` — DWARF1 struct layout parser (Demon Stone prototype)
+- `map-types.py` — Cl* → VI* type mapping (Demon Stone → CoN)
+- `ghidra-batch-decompile.py` — Jython script for Ghidra headless batch decompilation
+- `ghidra-apply-types.py` — Apply struct types to Ghidra project
+- `ghidra-retype-params.py` — Retype function `this` pointers in Ghidra
 - `pcsx2_hacks.py` — Parse PCSX2 GameDatabase for CoN entries
 
 ---
 
-## 5. Rust Analysis Stack (future — Phase 2+)
+## 6. Rust Analysis Stack (future — Phase 2+)
 
 For performance-critical binary processing.
 
