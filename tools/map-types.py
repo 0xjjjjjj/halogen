@@ -503,7 +503,7 @@ def generate_ghidra_script(mapping, xref):
         "dtm = currentProgram.getDataTypeManager()",
         'cat = CategoryPath("/SnowblindEngine")',
         "",
-        "# ═══ Struct definitions from Demon Stone DWARF1 ═══",
+        "# --- Struct definitions from Demon Stone DWARF1 ---",
         "",
     ]
 
