@@ -145,17 +145,12 @@ Best coverage: VIHSprite 67%, VIZone 65%, VIPointLight 56%, VICollide 54%, VIWnd
 **Depends on**: PCSX2 runtime tracing (#3)
 **Effort**: Days to weeks (VU1 instruction set is complex)
 
-#### 5. paraLLEl-GS Evaluation
-**Why**: Need to verify paraLLEl-GS can actually consume the GS command stream Champions of Norrath generates.
+#### 5. paraLLEl-GS Evaluation — COMPLETE
+Built parallel-gs-replayer on sleeper5 Windows (MSVC, VS2022, RTX 4090 Vulkan 1.4). Fed all 3 GS dumps through it — zero crashes, zero errors, zero unsupported GS features. Handles 102K draw calls/frame (worst-case caves) in <1 GB VRAM. BG:DA freeze bug confirmed as EE/VU emulation issue, not GS — irrelevant to native port.
 
-**Concrete steps**:
-- Build paraLLEl-GS from source
-- Feed it a PCSX2 GS dump from step #2
-- Check rendering accuracy vs PCSX2 software renderer
-- Identify any unsupported GS features
+**Verdict**: GO for Phase 3. paraLLEl-GS is the rendering backend.
 
-**Depends on**: PCSX2 GS dump capture (#3)
-**Effort**: Half day build + test
+**Output**: `docs/parallel-gs-eval.md`, `C:\parallel-gs\` on sleeper5
 
 ### Tier 3: Low value until implementation
 

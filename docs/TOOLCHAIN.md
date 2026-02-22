@@ -117,15 +117,34 @@ git clone https://github.com/chaoticgd/ghidra-emotionengine-reloaded
 
 ## 3. paraLLEl-GS
 
-Vulkan compute-shader Graphics Synthesizer emulator. This replaces the GS in native builds.
+Vulkan compute-shader Graphics Synthesizer emulator. This replaces the GS in native builds. **Evaluated 2026-02-22**: all 3 CoN GS dumps pass cleanly (see `docs/parallel-gs-eval.md`).
+
+### Build (Windows, native Vulkan required)
 
 ```bash
-git clone https://github.com/Arntzen-Software/parallel-gs
-# Follow repo build instructions
-# Requires Vulkan SDK
+git clone --recursive https://github.com/Arntzen-Software/parallel-gs.git C:\parallel-gs
+cd C:\parallel-gs
+cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release --target parallel-gs-replayer -j 16
 ```
 
-Integration point: Phase 3. PS2Recomp output calls GS via GIF DMA packets. We intercept these and route to paraLLEl-GS instead.
+No Vulkan SDK needed — uses volk (dynamic loader). Requires Vulkan 1.2+ GPU with `descriptorIndexing`, `timelineSemaphore`, `shaderInt16`. Any desktop GPU from ~2018+ works.
+
+**Note**: WSL2 on Windows 10 lacks Vulkan ICD for NVIDIA — build natively on Windows. Windows 11 WSL2 should work.
+
+### Testing with GS dumps
+
+```bash
+# Basic replay (headless)
+build\tools\Release\parallel-gs-replayer.exe dump.gs
+
+# 4x SSAA + full mode
+build\tools\Release\parallel-gs-replayer.exe dump.gs --ssaa 4 --full
+
+# For visual inspection, launch from RenderDoc
+```
+
+Integration point: Phase 3. PS2Recomp output calls GS via GIF DMA packets. We intercept these and route to paraLLEl-GS via `gs_interface.h`.
 
 Reference: [ps2tek GS documentation](https://psi-rockin.github.io/ps2tek/)
 
