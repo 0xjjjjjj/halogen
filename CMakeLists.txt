@@ -16,18 +16,38 @@ add_subdirectory(vendor/PS2Recomp/ps2xRuntime)
 
 # --- Recompiled game code ---
 # All 9,395 PS2Recomp-generated .cpp files
-file(GLOB RECOMP_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_SOURCE_DIR}/output/champions-of-norrath/*.cpp"
-)
+# RECOMP_DIR: override for short paths on Windows (e.g. -DRECOMP_DIR=C:/CoN)
+if(NOT RECOMP_DIR)
+    set(RECOMP_DIR "${CMAKE_SOURCE_DIR}/output/champions-of-norrath")
+endif()
+file(GLOB RECOMP_SOURCES CONFIGURE_DEPENDS "${RECOMP_DIR}/*.cpp")
 
 # Build as a static library (avoids re-linking 9K objects every time)
 add_library(recompiled_game STATIC ${RECOMP_SOURCES})
 target_include_directories(recompiled_game PRIVATE
     ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
-    ${CMAKE_SOURCE_DIR}/output/champions-of-norrath
+    ${RECOMP_DIR}
 )
+
+# Unity build: batch files per TU to reduce compiler invocations
+# PS2Recomp output is ideal for unity: no static vars, no anonymous namespaces
+# GCC handles 50/batch fine; MSVC needs smaller batches (memory pressure)
+if(MSVC)
+    set(UNITY_BATCH 10)  # 9,395 -> 940 TUs (MSVC memory-hungry with generated code)
+else()
+    set(UNITY_BATCH 50)  # 9,395 -> 188 TUs
+endif()
+set_target_properties(recompiled_game PROPERTIES
+    UNITY_BUILD ON
+    UNITY_BUILD_BATCH_SIZE ${UNITY_BATCH}
+)
+
 # Suppress warnings in generated code
-target_compile_options(recompiled_game PRIVATE -w)
+if(MSVC)
+    target_compile_options(recompiled_game PRIVATE /W0 /Z7 /Od /bigobj)
+else()
+    target_compile_options(recompiled_game PRIVATE -w -O0)
+endif()
 
 # --- Halogen executable ---
 add_executable(halogen
@@ -38,10 +58,14 @@ add_executable(halogen
 )
 target_include_directories(halogen PRIVATE
     ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
-    ${CMAKE_SOURCE_DIR}/output/champions-of-norrath
+    ${RECOMP_DIR}
 )
 target_link_libraries(halogen PRIVATE
     recompiled_game
     ps2_runtime
     raylib
 )
+
+if(MSVC)
+    target_compile_options(halogen PRIVATE /Z7)
+endif()
