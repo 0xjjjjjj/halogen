@@ -69,3 +69,28 @@ target_link_libraries(halogen PRIVATE
 if(MSVC)
     target_compile_options(halogen PRIVATE /Z7)
 endif()
+
+# --- Halogen headless executable (no Raylib / no window) ---
+# For crash-driven development: runs the dispatch loop on the main thread
+# with function tracing, crash dumps, and call limits.
+add_executable(halogen-headless
+    src/main_headless.cpp
+    src/raylib_stubs_headless.cpp
+    src/register_functions_gen.cpp
+    src/missing_stubs.cpp
+    src/linker_stubs_gen.cpp
+)
+target_include_directories(halogen-headless PRIVATE
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
+    ${RECOMP_DIR}
+)
+# Link ps2_runtime (for dispatchLoop, loadELF, memory, etc.) and
+# recompiled_game, but NOT raylib -- raylib_stubs_headless.cpp provides
+# no-op stubs for the raylib symbols that ps2_runtime.a references.
+target_link_libraries(halogen-headless PRIVATE
+    recompiled_game
+    ps2_runtime
+)
+if(MSVC)
+    target_compile_options(halogen-headless PRIVATE /Z7)
+endif()
