@@ -3,6 +3,7 @@
 // Usage: halogen-headless [--trace] [--max-calls N] <elf_file>
 
 #include "ps2_runtime.h"
+#include "ps2_syscalls.h"
 #include "register_functions.h"
 #include <iostream>
 #include <iomanip>
@@ -10,6 +11,7 @@
 #include <csignal>
 #include <cstdlib>
 #include <chrono>
+#include <thread>
 #include <unordered_map>
 
 // ---------------------------------------------------------------------------
@@ -141,6 +143,7 @@ static void printUsage(const char* prog)
               << "\nOptions:\n"
               << "  --trace          Print each function PC as it executes\n"
               << "  --max-calls N    Stop after N function dispatches\n"
+              << "  --cd-root DIR    Set CD filesystem root directory\n"
               << "  --help           Show this message\n"
               << std::endl;
 }
@@ -152,6 +155,7 @@ int main(int argc, char* argv[])
 {
     // Parse arguments
     std::string elfPath;
+    std::string cdRoot;
     for (int i = 1; i < argc; ++i)
     {
         std::string arg = argv[i];
@@ -162,6 +166,10 @@ int main(int argc, char* argv[])
         else if (arg == "--max-calls" && i + 1 < argc)
         {
             g_maxCalls = std::strtoull(argv[++i], nullptr, 10);
+        }
+        else if (arg == "--cd-root" && i + 1 < argc)
+        {
+            cdRoot = argv[++i];
         }
         else if (arg == "--help" || arg == "-h")
         {
@@ -222,6 +230,15 @@ int main(int argc, char* argv[])
 
     std::cout << "[headless] ELF loaded. Entry: 0x" << std::hex << runtime.cpu().pc << std::dec << std::endl;
 
+    // Override CD root if specified
+    if (!cdRoot.empty())
+    {
+        auto paths = PS2Runtime::getIoPaths();
+        paths.cdRoot = cdRoot;
+        PS2Runtime::setIoPaths(paths);
+        std::cout << "[headless] CD root: " << cdRoot << std::endl;
+    }
+
     // Set up initial CPU state (mirrors PS2Runtime::run())
     R5900Context& ctx = runtime.cpu();
     ctx.r[4] = _mm_setzero_si128();                                          // a0 = 0
@@ -242,6 +259,10 @@ int main(int argc, char* argv[])
               << "..." << std::endl;
 
     auto startTime = std::chrono::steady_clock::now();
+
+    // Register this as the main dispatch thread — only the main thread
+    // polls VBlank in cooperative WaitSema (worker threads just yield).
+    ps2_syscalls::setMainThread();
 
     // -----------------------------------------------------------------------
     // Manual dispatch loop (instead of runtime.dispatchLoop) for trace/limit
@@ -294,9 +315,15 @@ int main(int argc, char* argv[])
                           << elapsed << "ms, pc=0x" << std::hex << pc << std::dec << std::endl;
             }
 
-            // Dispatch
+            // Dispatch — hold guest exec mutex to serialize with worker threads
             ++g_callCount;
+            ps2_syscalls::getGuestExecMutex().lock();
             fn(rdram, &ctx, &runtime);
+            // Cooperative VBlank: drain pending ticks and dispatch INTC
+            // handlers on the main thread while still holding the mutex,
+            // matching real PS2 where interrupts fire on the same core.
+            ps2_syscalls::pollVBlank(rdram, &runtime);
+            ps2_syscalls::getGuestExecMutex().unlock();
         }
     }
     catch (const std::exception& e)
