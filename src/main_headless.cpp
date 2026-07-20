@@ -230,7 +230,15 @@ int main(int argc, char* argv[])
 
     std::cout << "[headless] ELF loaded. Entry: 0x" << std::hex << runtime.cpu().pc << std::dec << std::endl;
 
-    // Override CD root if specified
+    if (const char *dbgMenu = std::getenv("HALOGEN_DEBUG_MENU"); dbgMenu && dbgMenu[0] && dbgMenu[0] != '0')
+    {
+        uint8_t *dbg = runtime.memory().getRDRAM() + 0x17FA04u;
+        std::cerr << "[headless] debug menu patch: writing 0x00000000 at guest 0x0017FA04 (was 0x"
+                  << std::hex << *reinterpret_cast<uint32_t*>(dbg) << std::dec << ")" << std::endl;
+        std::memset(dbg, 0, 4);
+    }
+
+    if (!cdRoot.empty())
     if (!cdRoot.empty())
     {
         auto paths = PS2Runtime::getIoPaths();
