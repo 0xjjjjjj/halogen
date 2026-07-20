@@ -48,9 +48,56 @@ def patch_texture_smooth_border() -> bool:
     return True
 
 
+def patch_start_new_world() -> bool:
+    """startNewWorld: log gameLoadWorld arg + HALOGEN_FORCE_LEVEL override.
+
+    Lets us see which level string the game passes to gameLoadWorld
+    (typically 'intro' -> 'kelsel'), and lets a runtime env var
+    (HALOGEN_FORCE_LEVEL) replace it with any level name to jump
+    past the front-end menu flow.
+    """
+    f = OUT_DIR / "startNewWorld__Fv_0x2cd1e0.cpp"
+    if not f.exists():
+        print(f"[patch] MISSING {f.name}", file=sys.stderr)
+        return False
+    src = f.read_text()
+    marker = ('    ctx->pc = 0x1CBC48u;\n'
+              '    {\n'
+              '        const uint32_t __entryPc = ctx->pc;\n'
+              '        gameLoadWorld__FPc_0x1cbc48(rdram, ctx, runtime);')
+    if marker not in src:
+        print(f"[patch] {f.name}: marker not found", file=sys.stderr)
+        return False
+    replacement = (
+        '    ctx->pc = 0x1CBC48u;\n'
+        '    {\n'
+        '        uint32_t nameAddr = GPR_U32(ctx, 4);\n'
+        '        const char *cstr = reinterpret_cast<const char*>(getConstMemPtr(rdram, nameAddr));\n'
+        '        std::cerr << "[startNewWorld] gameLoadWorld arg name=\\""\n'
+        '                  << (cstr ? cstr : "<NULL>") << "\\" addr=0x" << std::hex << nameAddr << std::dec << std::endl;\n'
+        '        if (const char *forced = std::getenv("HALOGEN_FORCE_LEVEL"); forced && forced[0] && cstr) {\n'
+        '            char *mut = const_cast<char*>(cstr);\n'
+        '            std::strncpy(mut, forced, 15); mut[15] = 0;\n'
+        '            std::cerr << "[startNewWorld] FORCE level name -> \\"" << mut << "\\"" << std::endl;\n'
+        '        }\n'
+        '        const uint32_t __entryPc = ctx->pc;\n'
+        '        gameLoadWorld__FPc_0x1cbc48(rdram, ctx, runtime);')
+    if replacement in src:
+        print(f"[patch] {f.name}: already patched")
+        return True
+    src2 = src.replace(marker, replacement, 1)
+    if "#include <cstring>" not in src2:
+        src2 = src2.replace('#include "ps2_stubs.h"',
+                            '#include "ps2_stubs.h"\n#include <cstring>', 1)
+    f.write_text(src2)
+    print(f"[patch] {f.name}: applied gameLoadWorld arg probe + HALOGEN_FORCE_LEVEL override")
+    return True
+
+
 def main() -> int:
     ok = True
     ok &= patch_texture_smooth_border()
+    ok &= patch_start_new_world()
     return 0 if ok else 1
 
 
