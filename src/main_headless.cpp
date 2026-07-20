@@ -317,6 +317,41 @@ int main(int argc, char* argv[])
 
             // Dispatch — hold guest exec mutex to serialize with worker threads
             ++g_callCount;
+            static std::atomic<uint32_t> g_dispatchPC{0};
+            static std::atomic<uint64_t> g_dispatchCallNum{0};
+            g_dispatchPC.store(pc, std::memory_order_relaxed);
+            g_dispatchCallNum.store(g_callCount, std::memory_order_relaxed);
+
+            // Watchdog: sample ctx.pc (updated per-instruction) to find the inner tight loop.
+            static std::once_flag watchdogOnce;
+            std::call_once(watchdogOnce, [&]() {
+                std::thread([&]() {
+                    uint32_t lastInner = 0;
+                    int sameCount = 0;
+                    while (!runtime.isStopRequested()) {
+                        std::this_thread::sleep_for(std::chrono::seconds(2));
+                        uint32_t stuckDispatchPC = g_dispatchPC.load(std::memory_order_relaxed);
+                        uint64_t stuckCall = g_dispatchCallNum.load(std::memory_order_relaxed);
+                        uint32_t innerPC = ctx.pc;
+                        uint32_t innerRA = static_cast<uint32_t>(_mm_extract_epi32(ctx.r[31], 0));
+                        uint32_t innerSP = static_cast<uint32_t>(_mm_extract_epi32(ctx.r[29], 0));
+                        if (innerPC == lastInner) ++sameCount; else { sameCount = 0; lastInner = innerPC; }
+                        std::cerr << "[watchdog] call#" << stuckCall
+                                  << " dispPC=0x" << std::hex << stuckDispatchPC
+                                  << " innerPC=0x" << innerPC
+                                  << " ra=0x" << innerRA
+                                  << " sp=0x" << innerSP
+                                  << std::dec << " sameCount=" << sameCount << std::endl;
+                        auto workers = ps2_syscalls::snapshotWorkerCtxs();
+                        for (auto &w : workers) {
+                            std::cerr << "[watchdog]   worker tid=" << w.tid
+                                      << " pc=0x" << std::hex << w.pc
+                                      << " ra=0x" << w.ra << std::dec << std::endl;
+                        }
+                    }
+                }).detach();
+            });
+
             ps2_syscalls::getGuestExecMutex().lock();
             fn(rdram, &ctx, &runtime);
             // Cooperative VBlank: drain pending ticks and dispatch INTC
