@@ -14,6 +14,18 @@ endif()
 # Build ps2xRuntime as a subdirectory (brings in raylib via FetchContent)
 add_subdirectory(vendor/PS2Recomp/ps2xRuntime)
 
+# --- Vendor: parallel-gs (Vulkan GS emulator, LGPL-3.0+) ---
+# Consumed as a library via PARALLEL_GS_STANDALONE=ON. Provides targets:
+#   parallel-gs, granite-vulkan, granite-util, granite-application-global,
+#   granite-application-global-init, granite-volk.
+# Optional: skip if vendor tree isn't checked out (headless build still works).
+if(EXISTS "${CMAKE_SOURCE_DIR}/vendor/parallel-gs/CMakeLists.txt")
+    set(PARALLEL_GS_STANDALONE ON CACHE BOOL "" FORCE)
+    add_subdirectory(vendor/parallel-gs EXCLUDE_FROM_ALL)
+    set(HALOGEN_HAVE_PARALLEL_GS TRUE)
+    find_package(SDL2 REQUIRED)
+endif()
+
 # --- Recompiled game code ---
 # All 9,395 PS2Recomp-generated .cpp files
 # RECOMP_DIR: override for short paths on Windows (e.g. -DRECOMP_DIR=C:/CoN)
@@ -93,4 +105,43 @@ target_link_libraries(halogen-headless PRIVATE
 )
 if(MSVC)
     target_compile_options(halogen-headless PRIVATE /Z7)
+endif()
+
+# --- Halogen GUI executable (Vulkan window via SDL2 + parallel-gs) ---
+# Task #3320: live paraLLEl-GS integration. Renders real GIF DMA to a Vulkan
+# window instead of dumping to .gs files. M1: identical to headless (proves
+# CMake wiring). M2+: swap main_headless.cpp for main_gui.cpp with SDL2 window
+# + Vulkan swapchain + GSInterface init.
+if(HALOGEN_HAVE_PARALLEL_GS)
+    add_executable(halogen-gui
+        src/main_gui.cpp
+        src/raylib_stubs_headless.cpp
+        src/register_functions_gen.cpp
+        src/missing_stubs.cpp
+        src/linker_stubs_gen.cpp
+    )
+    target_include_directories(halogen-gui PRIVATE
+        ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
+        ${RECOMP_DIR}
+        ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/gs
+        ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/dump
+        ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/Granite/vulkan
+        ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/Granite/util
+        ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/Granite/math
+        ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/Granite/third_party/volk
+        ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/Granite/third_party/khronos/vulkan-headers/include
+    )
+    target_link_libraries(halogen-gui PRIVATE
+        recompiled_game
+        ps2_runtime
+        parallel-gs
+        parallel-gs-dump
+        granite-vulkan
+        granite-util
+        granite-volk
+        SDL2::SDL2
+    )
+    if(MSVC)
+        target_compile_options(halogen-gui PRIVATE /Z7)
+    endif()
 endif()

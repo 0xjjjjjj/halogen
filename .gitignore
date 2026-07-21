@@ -24,3 +24,7 @@ output/
 # Editor
 .vscode/
 *.swp
+
+build*/
+thoughts/
+.claude/
