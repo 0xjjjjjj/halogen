@@ -103,8 +103,8 @@ No Vulkan SDK needed — uses volk (dynamic Vulkan loader).
 
 | File | Description |
 |------|-------------|
-| `C:\parallel-gs\` (sleeper5) | Built paraLLEl-GS with replayer |
-| `C:\parallel-gs\dumps\` (sleeper5) | GS dumps copied for testing |
+| `C:\parallel-gs\` (build machine) | Built paraLLEl-GS with replayer |
+| `C:\parallel-gs\dumps\` (build machine) | GS dumps copied for testing |
 | `output/goblin-cave.gs` | Worst-case GS dump (48 MB, 102K draws) |
 | `output/town.gs` | Town GS dump (34 MB, 73K draws) |
 | `output/cave.gs` | Outdoor GS dump (33 MB, 60K draws) |

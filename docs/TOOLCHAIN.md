@@ -154,7 +154,7 @@ Reference: [ps2tek GS documentation](https://psi-rockin.github.io/ps2tek/)
 
 PCSX2 for GS dump capture and runtime analysis. Installed as portable (no installer).
 
-### Setup (Windows — sleeper5)
+### Setup (Windows dev workstation)
 
 ```
 # Already installed at C:\pcsx2\pcsx2-qt.exe (v2.7.136 nightly)

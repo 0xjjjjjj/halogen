@@ -40,7 +40,7 @@ Phase 1 done. Phase 2 static analysis done (2026-02-21). ELF acquired, PS2Recomp
 - Python DWARF1 type parser (tools/parse-dwarf1-types.py)
 - Scuffed ETL pipeline for video analysis (configs/scuffed-re-profile.yaml)
 - ast-grep call graph extraction tool (tools/extract-callgraph.sh)
-- Ghidra 11.4.2 + ghidra-emotionengine-reloaded v2.1.33 set up on sleeper5
+- Ghidra 11.4.2 + ghidra-emotionengine-reloaded v2.1.33 set up on the dev workstation
 
 ### What's next
 See docs/phase2-status.md for concrete next steps. Summary:
@@ -105,7 +105,7 @@ Also called the "Dark Alliance engine." Created by Ezra Dreisbach. Zero public t
 | Tool | Purpose | Status |
 |------|---------|--------|
 | PS2Recomp | MIPS R5900 → C++ static recompilation | Done — 9,395 files generated |
-| Ghidra + ghidra-emotionengine-reloaded | Manual RE, decompilation | Ready on sleeper5 (Ghidra 11.4.2, EE-Reloaded v2.1.33) |
+| Ghidra + ghidra-emotionengine-reloaded | Manual RE, decompilation | Ready on dev workstation (Ghidra 11.4.2, EE-Reloaded v2.1.33) |
 | paraLLEl-GS | Vulkan GS emulator (rendering backend) | Phase 3 integration |
 | PCSX2 debugger | Runtime analysis, pointer tracking | Available |
 | ast-grep | C++ AST-based call graph extraction | Working — tools/extract-callgraph.sh |

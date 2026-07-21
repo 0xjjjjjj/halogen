@@ -146,11 +146,11 @@ Best coverage: VIHSprite 67%, VIZone 65%, VIPointLight 56%, VICollide 54%, VIWnd
 **Effort**: Days to weeks (VU1 instruction set is complex)
 
 #### 5. paraLLEl-GS Evaluation — COMPLETE
-Built parallel-gs-replayer on sleeper5 Windows (MSVC, VS2022, RTX 4090 Vulkan 1.4). Fed all 3 GS dumps through it — zero crashes, zero errors, zero unsupported GS features. Handles 102K draw calls/frame (worst-case caves) in <1 GB VRAM. BG:DA freeze bug confirmed as EE/VU emulation issue, not GS — irrelevant to native port.
+Built parallel-gs-replayer on the Windows build machine (MSVC, VS2022, RTX 4090 Vulkan 1.4). Fed all 3 GS dumps through it — zero crashes, zero errors, zero unsupported GS features. Handles 102K draw calls/frame (worst-case caves) in <1 GB VRAM. BG:DA freeze bug confirmed as EE/VU emulation issue, not GS — irrelevant to native port.
 
 **Verdict**: GO for Phase 3. paraLLEl-GS is the rendering backend.
 
-**Output**: `docs/parallel-gs-eval.md`, `C:\parallel-gs\` on sleeper5
+**Output**: `docs/parallel-gs-eval.md`, `C:\parallel-gs\` on the build machine
 
 ### Tier 3: Low value until implementation
 
