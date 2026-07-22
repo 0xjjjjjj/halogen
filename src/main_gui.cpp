@@ -172,6 +172,11 @@ static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
                 std::memcpy(fixed + idx * 16, &v, 8);
             }
         }
+        if (std::getenv("HALOGEN_FORCE_DISPFB_ZERO"))
+        {
+            uint64_t forced = uint64_t(0) | (uint64_t(20) << 9) | (uint64_t(2) << 15);
+            std::memcpy(fixed + 9 * 16, &forced, 8);
+        }
         std::memcpy(&g_ifacePtr->get_priv_register_state(),
                     fixed,
                     sizeof(PrivRegisterState));
@@ -524,7 +529,7 @@ int main(int argc, char **argv)
             cmd->begin_render_pass(rp);
             cmd->end_render_pass();
             blit_scanout_to_swapchain(*cmd, device.get_swapchain_view().get_image(), *local.image,
-                                      local.internal_width, local.internal_height);
+                                      0, 0);
             if (hasNew) presentedScanouts++;
             if (frame < 240 || (frame % 60) == 0)
             {
