@@ -6,6 +6,7 @@
 #include "wsi.hpp"
 #include "command_buffer.hpp"
 #include "image.hpp"
+#include "thread_id.hpp"
 
 #include "gs_interface.hpp"
 #include "gs_dump_parser.hpp"
@@ -134,9 +135,79 @@ static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
     if (!g_ifacePtr) return;
     if (priv_regs_8k)
     {
+        uint8_t fixed[8192];
+        std::memcpy(fixed, priv_regs_8k, 8192);
+        uint64_t pmode_raw;
+        std::memcpy(&pmode_raw, fixed, 8);
+        if ((pmode_raw & 0x3) != 0)
+        {
+            pmode_raw |= 0x4;
+            std::memcpy(fixed, &pmode_raw, 8);
+        }
+        uint64_t smode1;
+        std::memcpy(&smode1, fixed + 1 * 16, 8);
+        if (smode1 == 0)
+        {
+            smode1 = (uint64_t(32) << 3) | (uint64_t(2) << 13);
+            std::memcpy(fixed + 1 * 16, &smode1, 8);
+        }
+        uint64_t smode2;
+        std::memcpy(&smode2, fixed + 2 * 16, 8);
+        if (smode2 == 0)
+        {
+            smode2 = 0x3;
+            std::memcpy(fixed + 2 * 16, &smode2, 8);
+        }
+        for (int idx : {8, 10})
+        {
+            uint64_t v;
+            std::memcpy(&v, fixed + idx * 16, 8);
+            uint32_t hi = uint32_t(v >> 32);
+            if (hi == 0)
+            {
+                uint32_t magh = uint32_t((v >> 23) & 0xF);
+                uint32_t dw_dots = 640u * (magh + 1u) - 1u;
+                uint64_t dwdh_hi = (uint64_t(dw_dots) & 0xFFF) | (uint64_t(447) << 12);
+                v = (v & 0xFFFFFFFFULL) | (dwdh_hi << 32);
+                std::memcpy(fixed + idx * 16, &v, 8);
+            }
+        }
         std::memcpy(&g_ifacePtr->get_priv_register_state(),
-                    priv_regs_8k,
+                    fixed,
                     sizeof(PrivRegisterState));
+        uint64_t n = g_vsyncCount.load(std::memory_order_relaxed);
+        if (n < 240 || (n % 60) == 0)
+        {
+            uint64_t pmode, dispfb1, display1, dispfb2, display2, bgcolor;
+            std::memcpy(&pmode, priv_regs_8k + 0, 8);
+            std::memcpy(&dispfb1, priv_regs_8k + 7 * 16, 8);
+            std::memcpy(&display1, priv_regs_8k + 8 * 16, 8);
+            std::memcpy(&dispfb2, priv_regs_8k + 9 * 16, 8);
+            std::memcpy(&display2, priv_regs_8k + 10 * 16, 8);
+            std::memcpy(&bgcolor, priv_regs_8k + 14 * 16, 8);
+            uint32_t d1_dx = uint32_t(display1) & 0xFFF;
+            uint32_t d1_dy = uint32_t(display1 >> 12) & 0x7FF;
+            uint32_t d1_magh = uint32_t(display1 >> 23) & 0xF;
+            uint32_t d1_magv = uint32_t(display1 >> 27) & 0x3;
+            uint32_t d1_dw = uint32_t(display1 >> 32) & 0xFFF;
+            uint32_t d1_dh = uint32_t(display1 >> 44) & 0x7FF;
+            uint32_t d2_dx = uint32_t(display2) & 0xFFF;
+            uint32_t d2_dy = uint32_t(display2 >> 12) & 0x7FF;
+            uint32_t d2_magh = uint32_t(display2 >> 23) & 0xF;
+            uint32_t d2_magv = uint32_t(display2 >> 27) & 0x3;
+            uint32_t d2_dw = uint32_t(display2 >> 32) & 0xFFF;
+            uint32_t d2_dh = uint32_t(display2 >> 44) & 0x7FF;
+            fprintf(stderr, "[vsync#%llu] pmode=0x%llx dispfb1=0x%llx dispfb2=0x%llx bgcolor=0x%llx\n"
+                            "  display1 dx=%u dy=%u magh=%u magv=%u dw=%u dh=%u\n"
+                            "  display2 dx=%u dy=%u magh=%u magv=%u dw=%u dh=%u\n",
+                    (unsigned long long)n,
+                    (unsigned long long)pmode,
+                    (unsigned long long)dispfb1,
+                    (unsigned long long)dispfb2,
+                    (unsigned long long)bgcolor,
+                    d1_dx, d1_dy, d1_magh, d1_magv, d1_dw, d1_dh,
+                    d2_dx, d2_dy, d2_magh, d2_magv, d2_dw, d2_dh);
+        }
     }
     g_ifacePtr->flush();
 
@@ -146,19 +217,38 @@ static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
     info.dst_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     info.dst_access = VK_ACCESS_TRANSFER_READ_BIT;
     info.adapt_to_internal_horizontal_resolution = true;
+    info.force_progressive = true;
+    info.anti_blur = true;
+    info.raw_circuit_scanout = false;
 
     ScanoutResult sr = g_ifacePtr->vsync(info);
-    g_vsyncCount.fetch_add(1, std::memory_order_relaxed);
+    uint64_t vn = g_vsyncCount.fetch_add(1, std::memory_order_relaxed);
+    if (vn < 240 || (vn % 60) == 0)
+    {
+        uint32_t iw = 0, ih = 0;
+        if (sr.image)
+        {
+            const auto &ci = sr.image->get_create_info();
+            iw = ci.width;
+            ih = ci.height;
+        }
+        fprintf(stderr, "[vsync#%llu] sr.image=%p int=%ux%u img=%ux%u\n",
+                (unsigned long long)vn, (void *)sr.image.get(),
+                sr.internal_width, sr.internal_height, iw, ih);
+    }
 
     std::lock_guard<std::mutex> lk(g_scanoutMutex);
     g_latestScanout = sr;
     g_haveNewScanout = true;
 }
 
-static void blit_scanout_to_swapchain(CommandBuffer &cmd, const Image &dst, const Image &src)
+static void blit_scanout_to_swapchain(CommandBuffer &cmd, const Image &dst, const Image &src,
+                                      uint32_t srcW, uint32_t srcH)
 {
     const auto &dc = dst.get_create_info();
     const auto &sc = src.get_create_info();
+    if (srcW == 0 || srcW > sc.width) srcW = sc.width;
+    if (srcH == 0 || srcH > sc.height) srcH = sc.height;
 
     cmd.full_barrier();
 
@@ -171,7 +261,7 @@ static void blit_scanout_to_swapchain(CommandBuffer &cmd, const Image &dst, cons
     VkImageBlit region = {};
     region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     region.srcSubresource.layerCount = 1;
-    region.srcOffsets[1] = {int32_t(sc.width), int32_t(sc.height), 1};
+    region.srcOffsets[1] = {int32_t(srcW), int32_t(srcH), 1};
     region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     region.dstSubresource.layerCount = 1;
     region.dstOffsets[1] = {int32_t(dc.width), int32_t(dc.height), 1};
@@ -330,7 +420,7 @@ int main(int argc, char **argv)
     wsi.set_backbuffer_format(BackbufferFormat::UNORM);
     wsi.set_present_mode(PresentMode::SyncToVBlank);
 
-    if (!wsi.init_simple(1, {}))
+    if (!wsi.init_simple(2, {}))
     {
         fprintf(stderr, "[halogen-gui] WSI init failed\n");
         SDL_DestroyWindow(window);
@@ -374,6 +464,7 @@ int main(int argc, char **argv)
     {
         guestThread = std::thread([&]()
         {
+            Util::register_thread_index(1);
             guestExit.store(run_guest_dispatch(gargs), std::memory_order_release);
         });
         fprintf(stderr, "[halogen-gui] guest launched, entering render loop\n");
@@ -416,16 +507,14 @@ int main(int argc, char **argv)
         bool hasNew = false;
         {
             std::lock_guard<std::mutex> lk(g_scanoutMutex);
-            if (g_haveNewScanout)
-            {
-                local = g_latestScanout;
-                g_haveNewScanout = false;
-                hasNew = true;
-            }
+            local = g_latestScanout;
+            hasNew = g_haveNewScanout;
+            g_haveNewScanout = false;
         }
 
         auto cmd = device.request_command_buffer();
-        if (hasNew && local.image)
+        const auto &swapImg = device.get_swapchain_view().get_image().get_create_info();
+        if (local.image)
         {
             auto rp = device.get_swapchain_render_pass(SwapchainRenderPass::ColorOnly);
             rp.clear_color[0].float32[0] = 0.0f;
@@ -434,8 +523,19 @@ int main(int argc, char **argv)
             rp.clear_color[0].float32[3] = 1.0f;
             cmd->begin_render_pass(rp);
             cmd->end_render_pass();
-            blit_scanout_to_swapchain(*cmd, device.get_swapchain_view().get_image(), *local.image);
-            presentedScanouts++;
+            blit_scanout_to_swapchain(*cmd, device.get_swapchain_view().get_image(), *local.image,
+                                      local.internal_width, local.internal_height);
+            if (hasNew) presentedScanouts++;
+            if (frame < 240 || (frame % 60) == 0)
+            {
+                const auto &srcCi = local.image->get_create_info();
+                fprintf(stderr, "[frame#%llu] %s swap=%ux%u img=%ux%u int=%ux%u mode=%ux%u\n",
+                        (unsigned long long)frame, hasNew ? "BLIT" : "REBLIT",
+                        swapImg.width, swapImg.height,
+                        srcCi.width, srcCi.height,
+                        local.internal_width, local.internal_height,
+                        local.mode_width, local.mode_height);
+            }
         }
         else
         {
@@ -446,6 +546,11 @@ int main(int argc, char **argv)
             rp.clear_color[0].float32[3] = 1.0f;
             cmd->begin_render_pass(rp);
             cmd->end_render_pass();
+            if (frame < 240 || (frame % 60) == 0)
+            {
+                fprintf(stderr, "[frame#%llu] CLEAR swap=%ux%u (no scanout yet)\n",
+                        (unsigned long long)frame, swapImg.width, swapImg.height);
+            }
         }
         device.submit(cmd);
         wsi.end_frame();
