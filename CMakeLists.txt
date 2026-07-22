@@ -12,6 +12,7 @@ endif()
 
 # --- Vendor: ps2_runtime static library ---
 # Build ps2xRuntime as a subdirectory (brings in raylib via FetchContent)
+add_subdirectory(vendor/PS2Recomp/ps2xIOP)
 add_subdirectory(vendor/PS2Recomp/ps2xRuntime)
 
 # --- Vendor: parallel-gs (Vulkan GS emulator, LGPL-3.0+) ---
@@ -38,6 +39,8 @@ file(GLOB RECOMP_SOURCES CONFIGURE_DEPENDS "${RECOMP_DIR}/*.cpp")
 add_library(recompiled_game STATIC ${RECOMP_SOURCES})
 target_include_directories(recompiled_game PRIVATE
     ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/src/lib/Kernel
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xIOP/include
     ${RECOMP_DIR}
 )
 
@@ -64,12 +67,14 @@ endif()
 # --- Halogen executable ---
 add_executable(halogen
     vendor/PS2Recomp/ps2xRuntime/src/main.cpp
-    src/register_functions_gen.cpp
-    src/missing_stubs.cpp
-    src/linker_stubs_gen.cpp
+
+    
+    
 )
 target_include_directories(halogen PRIVATE
     ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/src/lib/Kernel
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xIOP/include
     ${RECOMP_DIR}
 )
 target_link_libraries(halogen PRIVATE
@@ -87,13 +92,15 @@ endif()
 # with function tracing, crash dumps, and call limits.
 add_executable(halogen-headless
     src/main_headless.cpp
-    src/raylib_stubs_headless.cpp
-    src/register_functions_gen.cpp
-    src/missing_stubs.cpp
-    src/linker_stubs_gen.cpp
+    
+
+    
+    
 )
 target_include_directories(halogen-headless PRIVATE
     ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/src/lib/Kernel
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xIOP/include
     ${RECOMP_DIR}
 )
 # Link ps2_runtime (for dispatchLoop, loadELF, memory, etc.) and
@@ -115,13 +122,11 @@ endif()
 if(HALOGEN_HAVE_PARALLEL_GS)
     add_executable(halogen-gui
         src/main_gui.cpp
-        src/raylib_stubs_headless.cpp
-        src/register_functions_gen.cpp
-        src/missing_stubs.cpp
-        src/linker_stubs_gen.cpp
     )
     target_include_directories(halogen-gui PRIVATE
         ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/include
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xRuntime/src/lib/Kernel
+    ${CMAKE_SOURCE_DIR}/vendor/PS2Recomp/ps2xIOP/include
         ${RECOMP_DIR}
         ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/gs
         ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/dump
@@ -132,8 +137,10 @@ if(HALOGEN_HAVE_PARALLEL_GS)
         ${CMAKE_SOURCE_DIR}/vendor/parallel-gs/Granite/third_party/khronos/vulkan-headers/include
     )
     target_link_libraries(halogen-gui PRIVATE
+        -Wl,--start-group
         recompiled_game
         ps2_runtime
+        -Wl,--end-group
         parallel-gs
         parallel-gs-dump
         granite-vulkan

@@ -14,7 +14,7 @@
 #include "ps2_runtime.h"
 #include "ps2_syscalls.h"
 #include "ps2_stubs.h"
-#include "register_functions.h"
+// #include "register_functions.h" // upstream: registration is now static array init
 
 #include <atomic>
 #include <chrono>
@@ -304,7 +304,7 @@ static int run_guest_dispatch(const GuestArgs &args)
         return 1;
     }
 
-    registerAllFunctions(runtime);
+    // registerAllFunctions no longer needed (upstream uses static array init)
 
     if (!runtime.loadELF(args.elfPath))
     {
@@ -329,7 +329,7 @@ static int run_guest_dispatch(const GuestArgs &args)
     ctx.r[5] = _mm_setzero_si128();
     ctx.r[29] = _mm_set_epi64x(0, static_cast<int64_t>(PS2_RAM_SIZE - 0x10u));
 
-    ps2_syscalls::setMainThread();
+    // ps2_syscalls::setMainThread(); — upstream API doesn't need this
 
     uint8_t *rdram = runtime.memory().getRDRAM();
     int exitCode = 0;
@@ -346,10 +346,7 @@ static int run_guest_dispatch(const GuestArgs &args)
             }
             auto fn = runtime.lookupFunction(pc);
 
-            ps2_syscalls::getGuestExecMutex().lock();
             fn(rdram, &ctx, &runtime);
-            ps2_syscalls::pollVBlank(rdram, &runtime);
-            ps2_syscalls::getGuestExecMutex().unlock();
         }
     }
     catch (const std::exception &e)
@@ -468,8 +465,8 @@ int main(int argc, char **argv)
     }
     else
     {
-        ps2_stubs::g_halogenGsTransfer = &halogen_gs_transfer_cb;
-        ps2_stubs::g_halogenGsVSync = &halogen_gs_vsync_cb;
+        // TODO: hook GS transfer forwarding in upstream runtime
+        // TODO: hook GS vsync forwarding in upstream runtime
     }
 
     std::atomic<int> guestExit{0};
@@ -583,8 +580,8 @@ int main(int argc, char **argv)
         }
     }
 
-    ps2_stubs::g_halogenGsTransfer = nullptr;
-    ps2_stubs::g_halogenGsVSync = nullptr;
+    
+    
 
     if (auto *rt = g_runtime.load(std::memory_order_acquire); rt != nullptr)
     {
