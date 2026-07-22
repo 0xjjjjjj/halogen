@@ -177,6 +177,15 @@ static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
             uint64_t forced = uint64_t(0) | (uint64_t(20) << 9) | (uint64_t(2) << 15);
             std::memcpy(fixed + 9 * 16, &forced, 8);
         }
+        if (std::getenv("HALOGEN_FORCE_CIRCUIT1"))
+        {
+            uint64_t pmode = pmode_raw | 0x1;
+            pmode &= ~uint64_t(0x2);
+            std::memcpy(fixed, &pmode, 8);
+            uint64_t dispfb2_val;
+            std::memcpy(&dispfb2_val, fixed + 9 * 16, 8);
+            std::memcpy(fixed + 7 * 16, &dispfb2_val, 8);
+        }
         std::memcpy(&g_ifacePtr->get_priv_register_state(),
                     fixed,
                     sizeof(PrivRegisterState));
