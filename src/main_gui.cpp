@@ -17,6 +17,10 @@
 #include "Stubs/Audio.h"
 #include "Stubs/GS.h"
 #include "Stubs/MPEG.h"
+
+// forward-decl raylib audio to avoid raylib.h Image/Rectangle name clashes with Vulkan
+extern "C" void InitAudioDevice(void);
+extern "C" bool IsAudioDeviceReady(void);
 // #include "register_functions.h" // upstream: registration is now static array init
 
 #include <atomic>
@@ -354,6 +358,20 @@ static int run_guest_dispatch(const GuestArgs &args)
     ps2_stubs::resetAudioStubState();
     ps2_stubs::resetGsSyncVCallbackState();
     ps2_stubs::resetMpegStubState();
+
+    // halogen bypasses PS2Runtime::initialize, so wire raylib audio here for lgAudInit
+    InitAudioDevice();
+    runtime.audioBackend().setAudioReady(IsAudioDeviceReady());
+    std::cerr << "[gui/guest] audio backend ready=" << IsAudioDeviceReady() << std::endl;
+
+    // guest audio init depends on real IOP libaudio.irx; shim lgAudInit to skip
+    auto returnZero = [](uint8_t*, R5900Context* c, PS2Runtime*){
+        setReturnS32(c, 0);
+        c->pc = static_cast<uint32_t>(_mm_cvtsi128_si64(c->r[31]));
+    };
+    runtime.replaceFunction(0x2d8270u, returnZero); // sceSifCallRpc
+    runtime.replaceFunction(0x2e9098u, returnZero); // lgAudInit
+    std::cerr << "[gui/guest] shimmed sceSifCallRpc + lgAudInit -> rc=0" << std::endl;
 
     uint8_t *rdram = runtime.memory().getRDRAM();
     ps2_syscalls::initializeGuestKernelState(rdram);
