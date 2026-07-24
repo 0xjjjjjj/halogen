@@ -14,6 +14,9 @@
 #include "ps2_runtime.h"
 #include "ps2_syscalls.h"
 #include "ps2_stubs.h"
+#include "Stubs/Audio.h"
+#include "Stubs/GS.h"
+#include "Stubs/MPEG.h"
 // #include "register_functions.h" // upstream: registration is now static array init
 
 #include <atomic>
@@ -128,6 +131,39 @@ static void halogen_gs_transfer_cb(uint8_t path, const void *data, uint32_t size
     if (!g_ifacePtr) return;
     g_ifacePtr->gif_transfer(path, data, size_bytes);
     g_gifTransferCount.fetch_add(1, std::memory_order_relaxed);
+}
+
+// Upstream GifArbiter emits (data,size); Snowblind routes GS via VU1 XGKICK (path=1).
+static void halogen_gs_arbiter_adapter(const uint8_t *data, uint32_t size_bytes)
+{
+    halogen_gs_transfer_cb(1, data, size_bytes);
+}
+
+static void build_priv_regs_buffer(uint8_t *dst_8k, const GSRegisters &gs)
+{
+    std::memset(dst_8k, 0, 8192);
+    auto put = [dst_8k](int idx, uint64_t val) {
+        std::memcpy(dst_8k + idx * 16, &val, sizeof(val));
+    };
+    put(0,  gs.pmode);
+    put(1,  gs.smode1);
+    put(2,  gs.smode2);
+    put(3,  gs.srfsh);
+    put(4,  gs.synch1);
+    put(5,  gs.synch2);
+    put(6,  gs.syncv);
+    put(7,  gs.dispfb1);
+    put(8,  gs.display1);
+    put(9,  gs.dispfb2);
+    put(10, gs.display2);
+    put(11, gs.extbuf);
+    put(12, gs.extdata);
+    put(13, gs.extwrite);
+    put(14, gs.bgcolor);
+    put(15, gs.csr.load(std::memory_order_relaxed));
+    put(16, gs.imr);
+    put(17, gs.busdir);
+    put(18, gs.siglblid);
 }
 
 static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
@@ -304,7 +340,17 @@ static int run_guest_dispatch(const GuestArgs &args)
         return 1;
     }
 
-    // registerAllFunctions no longer needed (upstream uses static array init)
+    if (!runtime.syncCoreSubsystems())
+    {
+        std::cerr << "[gui/guest] syncCoreSubsystems failed" << std::endl;
+        g_runtime.store(nullptr);
+        return 1;
+    }
+
+    runtime.setMissingFunctionPolicy(PS2Runtime::MissingFunctionPolicy::Stop);
+
+    // Steal the arbiter route away from upstream's raylib rasterizer → parallel-gs.
+    runtime.gifArbiter().setProcessPacketFn(&halogen_gs_arbiter_adapter);
 
     if (!runtime.loadELF(args.elfPath))
     {
@@ -324,30 +370,25 @@ static int run_guest_dispatch(const GuestArgs &args)
         std::cerr << "[gui/guest] CD root: " << args.cdRoot << std::endl;
     }
 
+    ps2_stubs::resetSifState();
+    ps2_stubs::resetAudioStubState();
+    ps2_stubs::resetGsSyncVCallbackState();
+    ps2_stubs::resetMpegStubState();
+
+    uint8_t *rdram = runtime.memory().getRDRAM();
+    ps2_syscalls::initializeGuestKernelState(rdram);
+
     R5900Context &ctx = runtime.cpu();
     ctx.r[4] = _mm_setzero_si128();
     ctx.r[5] = _mm_setzero_si128();
     ctx.r[29] = _mm_set_epi64x(0, static_cast<int64_t>(PS2_RAM_SIZE - 0x10u));
 
-    // ps2_syscalls::setMainThread(); — upstream API doesn't need this
+    ps2_syscalls::EnsureVSyncWorkerRunning(rdram, &runtime);
 
-    uint8_t *rdram = runtime.memory().getRDRAM();
     int exitCode = 0;
-
     try
     {
-        while (!runtime.isStopRequested())
-        {
-            uint32_t pc = ctx.pc;
-            if (pc == 0u)
-            {
-                std::cerr << "[gui/guest] PC=0, clean exit" << std::endl;
-                break;
-            }
-            auto fn = runtime.lookupFunction(pc);
-
-            fn(rdram, &ctx, &runtime);
-        }
+        runtime.dispatchLoop(rdram, &ctx);
     }
     catch (const std::exception &e)
     {
@@ -463,12 +504,6 @@ int main(int argc, char **argv)
         replayMode = true;
         fprintf(stderr, "[halogen-gui] REPLAY MODE: %s (guest skipped)\n", replayPath);
     }
-    else
-    {
-        // TODO: hook GS transfer forwarding in upstream runtime
-        // TODO: hook GS vsync forwarding in upstream runtime
-    }
-
     std::atomic<int> guestExit{0};
     std::thread guestThread;
     if (!replayMode)
@@ -487,6 +522,7 @@ int main(int argc, char **argv)
 
     uint64_t frame = 0;
     uint64_t presentedScanouts = 0;
+    uint64_t lastVsyncTick = 0;
     auto startTime = std::chrono::steady_clock::now();
     while (platform.alive(wsi))
     {
@@ -496,6 +532,18 @@ int main(int argc, char **argv)
             {
                 std::cerr << "[halogen-gui] guest exited, closing window" << std::endl;
                 break;
+            }
+
+            if (auto *rt = g_runtime.load(std::memory_order_acquire); rt != nullptr)
+            {
+                uint64_t curTick = ps2_syscalls::GetCurrentVSyncTick();
+                if (curTick != lastVsyncTick)
+                {
+                    lastVsyncTick = curTick;
+                    uint8_t priv[8192];
+                    build_priv_regs_buffer(priv, rt->memory().gs());
+                    halogen_gs_vsync_cb(priv);
+                }
             }
         }
 
