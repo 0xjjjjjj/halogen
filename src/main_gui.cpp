@@ -173,13 +173,7 @@ static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
     {
         uint8_t fixed[8192];
         std::memcpy(fixed, priv_regs_8k, 8192);
-        uint64_t pmode_raw;
-        std::memcpy(&pmode_raw, fixed, 8);
-        if ((pmode_raw & 0x3) != 0)
-        {
-            pmode_raw |= 0x4;
-            std::memcpy(fixed, &pmode_raw, 8);
-        }
+        // Fill NTSC defaults for regs upstream GsSetCrt stub leaves zero.
         uint64_t smode1;
         std::memcpy(&smode1, fixed + 1 * 16, 8);
         if (smode1 == 0)
@@ -207,20 +201,6 @@ static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
                 v = (v & 0xFFFFFFFFULL) | (dwdh_hi << 32);
                 std::memcpy(fixed + idx * 16, &v, 8);
             }
-        }
-        if (std::getenv("HALOGEN_FORCE_DISPFB_ZERO"))
-        {
-            uint64_t forced = uint64_t(0) | (uint64_t(20) << 9) | (uint64_t(2) << 15);
-            std::memcpy(fixed + 9 * 16, &forced, 8);
-        }
-        if (std::getenv("HALOGEN_FORCE_CIRCUIT1"))
-        {
-            uint64_t pmode = pmode_raw | 0x1;
-            pmode &= ~uint64_t(0x2);
-            std::memcpy(fixed, &pmode, 8);
-            uint64_t dispfb2_val;
-            std::memcpy(&dispfb2_val, fixed + 9 * 16, 8);
-            std::memcpy(fixed + 7 * 16, &dispfb2_val, 8);
         }
         std::memcpy(&g_ifacePtr->get_priv_register_state(),
                     fixed,
@@ -267,7 +247,7 @@ static void halogen_gs_vsync_cb(const uint8_t *priv_regs_8k)
     info.dst_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     info.dst_access = VK_ACCESS_TRANSFER_READ_BIT;
     info.adapt_to_internal_horizontal_resolution = true;
-    info.force_progressive = true;
+    info.force_progressive = false;
     info.anti_blur = true;
     info.raw_circuit_scanout = false;
 
