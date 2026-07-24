@@ -523,18 +523,21 @@ int main(int argc, char **argv)
     uint64_t frame = 0;
     uint64_t presentedScanouts = 0;
     uint64_t lastVsyncTick = 0;
+    bool guestEverSeen = false;
     auto startTime = std::chrono::steady_clock::now();
     while (platform.alive(wsi))
     {
         if (!replayMode)
         {
-            if (auto *rt = g_runtime.load(std::memory_order_acquire); rt == nullptr && frame > 0)
+            auto *rt = g_runtime.load(std::memory_order_acquire);
+            if (rt != nullptr) guestEverSeen = true;
+            if (rt == nullptr && guestEverSeen)
             {
                 std::cerr << "[halogen-gui] guest exited, closing window" << std::endl;
                 break;
             }
 
-            if (auto *rt = g_runtime.load(std::memory_order_acquire); rt != nullptr)
+            if (rt != nullptr)
             {
                 uint64_t curTick = ps2_syscalls::GetCurrentVSyncTick();
                 if (curTick != lastVsyncTick)
