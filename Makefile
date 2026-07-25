@@ -32,12 +32,12 @@ win-deploy: win-package
 	@[ -f bin/SLUS_205.65 ] && rsync -a bin/SLUS_205.65 $(DEPLOY_TO)/bin/ && mkdir -p $(DEPLOY_TO)/bin || true
 	@echo "deployed to $(DEPLOY_TO) — run: $(DEPLOY_TO)\\halogen-gui.exe"
 
-CD_ROOT ?= \\\\wsl.localhost\\Ubuntu\\home\\j\\git\\halogen\\bin\\disc
-ELF     ?= \\\\wsl.localhost\\Ubuntu\\home\\j\\git\\halogen\\bin\\SLUS_205.65
+CD_ROOT ?= C:\halogen-run\bin\disc
+ELF     ?= C:\halogen-run\bin\SLUS_205.65
 TIMEOUT ?= 30
 
 win-run:
-	/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command '$$exe="C:\halogen-run\halogen-gui.exe"; $$p=Start-Process $$exe -ArgumentList @("--cd-root","$(CD_ROOT)","$(ELF)") -WorkingDirectory (Split-Path $$exe) -RedirectStandardOutput C:\halogen-run\stdout.log -RedirectStandardError C:\halogen-run\stderr.log -PassThru; Start-Sleep -Seconds $(TIMEOUT); if(!$$p.HasExited){Stop-Process -Id $$p.Id -Force}; Write-Host "---stderr---"; Get-Content C:\halogen-run\stderr.log | Select-Object -Last 30'
+	/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -Command "\$$env:GRANITE_VULKAN_PRESENT_WAIT_LATENCY=0; \$$env:GRANITE_VULKAN_NO_VALIDATION=1; \$$exe='C:\halogen-run\halogen-gui.exe'; \$$p=Start-Process \$$exe -ArgumentList @('--cd-root','$(CD_ROOT)','$(ELF)') -WorkingDirectory (Split-Path \$$exe) -RedirectStandardOutput C:\halogen-run\stdout.log -RedirectStandardError C:\halogen-run\stderr.log -PassThru; Start-Sleep -Seconds $(TIMEOUT); if(!\$$p.HasExited){Stop-Process -Id \$$p.Id -Force}; Write-Host '---stderr---'; Get-Content C:\halogen-run\stderr.log | Select-Object -Last 40"
 
 win-all: win-configure win-build win-deploy
 

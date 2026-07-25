@@ -539,6 +539,7 @@ int main(int argc, char **argv)
             if (rt != nullptr)
             {
                 uint64_t curTick = ps2_syscalls::GetCurrentVSyncTick();
+                static std::atomic<int> _pc{0}; int nc=++_pc; if(nc<=5||nc%60==0){std::fprintf(stderr,"[VSYNC-POLL] #%d cur=%llu last=%llu\n",nc,(unsigned long long)curTick,(unsigned long long)lastVsyncTick);std::fflush(stderr);}
                 if (curTick != lastVsyncTick)
                 {
                     lastVsyncTick = curTick;
@@ -549,8 +550,16 @@ int main(int argc, char **argv)
             }
         }
 
+        {
+            static std::atomic<int> _bc{0}; int nc=++_bc;
+            if(nc<=5||nc%60==0){std::fprintf(stderr,"[FRAME-STAGE] #%d before begin_frame\n",nc);std::fflush(stderr);}
+        }
         if (!wsi.begin_frame())
             continue;
+        {
+            static std::atomic<int> _ac{0}; int nc=++_ac;
+            if(nc<=5||nc%60==0){std::fprintf(stderr,"[FRAME-STAGE] #%d after begin_frame\n",nc);std::fflush(stderr);}
+        }
 
         if (replayMode)
         {
@@ -613,8 +622,20 @@ int main(int argc, char **argv)
                         (unsigned long long)frame, swapImg.width, swapImg.height);
             }
         }
+        {
+            static std::atomic<int> _sc{0}; int nc=++_sc;
+            if(nc<=8||nc%60==0){std::fprintf(stderr,"[FRAME-STAGE] #%d before submit\n",nc);std::fflush(stderr);}
+        }
         device.submit(cmd);
+        {
+            static std::atomic<int> _sc{0}; int nc=++_sc;
+            if(nc<=8||nc%60==0){std::fprintf(stderr,"[FRAME-STAGE] #%d after submit, before end_frame\n",nc);std::fflush(stderr);}
+        }
         wsi.end_frame();
+        {
+            static std::atomic<int> _sc{0}; int nc=++_sc;
+            if(nc<=8||nc%60==0){std::fprintf(stderr,"[FRAME-STAGE] #%d after end_frame\n",nc);std::fflush(stderr);}
+        }
         frame++;
 
         if ((frame % 60) == 0)
